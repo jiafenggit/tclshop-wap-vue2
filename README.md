@@ -1,6 +1,6 @@
 # tclshop-wap-vue
 
-> A Vue.js project
+> tcl 移动端商城
 
 ## Build Setup
 
