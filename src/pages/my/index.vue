@@ -19,7 +19,7 @@
           </router-link>
         </li>
         <li>
-          <router-link :to="{path:'/my/orders',query:{type:1}}">
+          <router-link :to="{path:'/my/orders',query:{types:1}}">
             <div class="icon iky-time">
               <span class="circle waitpt" v-text="waitpt" v-show="waitpt>0">&nbsp;</span>
             </div>
@@ -27,7 +27,7 @@
           </router-link>
         </li>
         <li>
-          <router-link :to="{path:'/my/orders',query:{type:6}}">
+          <router-link :to="{path:'/my/orders',query:{types:6}}">
             <div class="icon iky-address">
               <span class="circle shopcount" v-text="shopcount" v-show="shopcount>0">&nbsp;</span>
             </div>

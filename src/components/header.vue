@@ -4,7 +4,10 @@
       <router-link to="/" class="iky-tcl-logo"></router-link>
       <div class="top-bar">
         <a @click="toggleMenu('show')"><span class="iky-menu"></span></a>
-        <router-link to="/cart/"><span class="iky-cart"></span><span class="cart-count">0</span></router-link>
+        <router-link to="/cart/">
+          <span class="iky-cart"></span>
+          <span class="cart-count" v-show="cartCount>0" v-text="cartCount"></span>
+        </router-link>
         <router-link to="/search"><span class="iky-search"></span></router-link>
       </div>
     </div>
@@ -108,11 +111,13 @@
           name: '健康电器',
           icon: 'iky-healthy',
           link: 'health'
-        }, ]
+        }, ],
+        cartCount: 0
       }
     },
     created() {
       this.$util.resize()
+      this.getCount()
     },
     methods: {
       toggleMenu(t) {
@@ -123,6 +128,14 @@
         el.style.top = t == 'show' ? 0 : '-100%';
         // console.log(el.style.top)
         // $('.headermenu').css('top', 0);
+      },
+      getCount() {
+        if (this.$util.getCookie('token') != null)
+          this.$http.get('/cart/count', null, r => {
+            if (r.code == '0') {
+              this.cartCount = r.data
+            }
+          });
       }
     }
   }

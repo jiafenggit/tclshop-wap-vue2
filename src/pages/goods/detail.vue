@@ -5,8 +5,10 @@
       <div class="sub">
         <span class="iky-weibo-line"></span>
         <span>详情</span>
-         <!--this.commentLink = '/goods/comment.html?' + (psale || this.isPreSales ? 'type=presale' : '') + 'uuid=' +              this.uuid + '&attrId=' + this.skuNo-->
-        <router-link id="comment" :to="{path:'/goods/comment',query:{uuid:this.uuid,attrId:this.skuNo}}" v-show="commentNum>0"><span id="commentNum">{{commentNum}}</span><span class="iky-msg1"></span></router-link>
+        <!--this.commentLink = '/goods/comment.html?' + (psale || this.isPreSales ? 'type=presale' : '') + 'uuid=' +              this.uuid + '&attrId=' + this.skuNo-->
+        <router-link id="comment" :to="{path:'/goods/comment',query:{uuid:this.uuid,attrId:this.skuNo}}" v-show="commentNum>0">
+          <span id="commentNum">{{commentNum}}</span><span class="iky-msg1"></span>
+        </router-link>
       </div>
     </div>
     <div class="slider">
@@ -52,9 +54,9 @@
     </div>
     <p class="t-count">数量</p>
     <div class="count-box">
-      <span class="reduce">-</span>
+      <span class="reduce" @click="setCart('reduce')">-</span>
       <span class="num">{{buyCount}}</span>
-      <span class="plus">+</span>
+      <span class="plus" @click="setCart('push')">+</span>
     </div>
     <div class="suite">
       <div class="item" v-for="m in suiteList">
@@ -105,7 +107,7 @@
       </div>
     </div>
     <div class="btnbuy-box">
-      <input type="button" value="立即购买" class="btnbuy">
+      <input type="button" value="立即购买" class="btnbuy" @click="addCart">
     </div>
   </main>
   <main class="goods-detail" v-else="returnCode==1">
@@ -171,7 +173,7 @@
         promotionUuid: null, //秒杀商品的uuid
         hasProductTip: null,
         storeUuid: null,
- 
+
       }
     },
     created() {
@@ -194,6 +196,27 @@
     //   slider,
     // },
     methods: {
+      addCart() {
+        var params = {
+          productUuid: this.uuid,
+          buyNum: this.buyCount,
+          attrId: this.skuNo
+        };
+        this.$http.post('/front/product/addProductToCart', params, r => {
+          if (r.code == '403') {
+            this.$router.push({
+              path: '/account/login'
+            })
+          }
+          if (r.code == 0) {
+            this.$router.push({
+              path: '/cart'
+            })
+          } else {
+            alert('加入购物车失败')
+          }
+        });
+      },
       setGoodsInfo(res) {
         var pro = res.productModel.productMain;
         // secondParentCategoryName = res.secondParentCategoryName;
@@ -378,7 +401,7 @@
             this.hasProduct();
             //加载用户评论数量
             // if (!psale && !isKill && !isPreSales) {
-           
+
             this.getComentsCount();
             //  };
 
@@ -524,9 +547,9 @@
           productUuid: this.productUuid
         }, res => {
           //   if (res.code == '0') {
-        //   res.data - 0 > 0 && ($('#commentNum').text(res.data), $('.goods-title .sub').show())
+          //   res.data - 0 > 0 && ($('#commentNum').text(res.data), $('.goods-title .sub').show())
           //   };
-          commentNum = res.data
+          this.commentNum = res.data
         });
       },
       hasProduct() {
