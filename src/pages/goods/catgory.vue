@@ -266,10 +266,11 @@
           };
 
           var favdata = this.favdata
-          var list = r.list.filter(function (m) {
+          var list = r.list.map(function (m) {
             var d = favdata.filter(function (n) {
-              return m.uid == n.productUuid;
+              return n.productUuid == m.uuid;
             })[0];
+            console.log(d)
             if (d && d.uuid) {
               m.favTxt = '已收藏'
               m.cls = 'favorite active'
@@ -293,11 +294,9 @@
         if (this.loadEnd && this.nowPage < this.pageCount) {
           this.nowPage++
         }
-        // console.log(this.nowPage)
       },
-      getFavoriteList(callback) {
+      getFavoriteList() {
         var _this = this;
-
         this.$api.get('/front/product/getMyProductFavoriteList', null, r => {
           if (r.code == '1' && r.retData && r.retData.length > 0) {
             this.favdata = r.retData;
@@ -306,25 +305,37 @@
         })
       },
       setFavorite(item) {
-        // router.go()
-        // console.log(this.router)
-        this.$router.push({
-          name: 'login'
-        })
-        return
+        var _this = this
         if (item.isFav) {
           this.$api.get('/front/product/cancelFavorite', {
             productUuid: item.uuid
-          }, function (res) {
-            res.code == '403' ? Account.toLogin() :
-              callback && callback(res);
+          }, r => {
+            if (r == '1') {
+              item.isFav = false
+              item.favTxt = '收藏'
+              item.cls = 'favorite'
+              // this.favdata.splice(this.favdata.,1)
+            }
+            r && r.code == '403' && _this.$router.push({
+              name: 'login'
+            })
           });
         } else {
           this.$api.get('/front/product/collectProduct', {
             productUuid: item.uuid,
-          }, function (res) {
-            res.code == '403' ? Account.toLogin() : ''
-
+          }, r => {
+            console.log(r)
+            if (r == '1') {
+              item.isFav = true
+              item.favTxt = '已收藏'
+              item.cls = 'favorite active'
+              this.favdata.push({
+                productUuid: item.productUuid
+              })
+            }
+            r && r.code == '403' && _this.$router.push({
+              name: 'login'
+            })
           });
         }
       }

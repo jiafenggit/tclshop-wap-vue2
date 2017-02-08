@@ -9,7 +9,7 @@ var env = process.env.NODE_ENV
 var cssSourceMapDev = (env === 'development' && config.dev.cssSourceMap)
 var cssSourceMapProd = (env === 'production' && config.build.productionSourceMap)
 var useCssSourceMap = cssSourceMapDev || cssSourceMapProd
-var ExtractTextPlugin = require('extract-text-webpack-plugin')
+// var ExtractTextPlugin = require('extract-text-webpack-plugin')
 module.exports = {
   entry: {
     app: './src/main.js'
@@ -74,15 +74,27 @@ module.exports = {
       },
       {
         test: /\.less$/,
-        // test: /\.less$/i, loader: ExtractTextPlugin.extract('css!less')
         loader: 'style!css!less'
+        // test: /\.less/,
+        // exclude: /^node_modules$/,
+        // loader: `style-loader!css-loader!autoprefixer-loader?{ browsers: ['last 100 versions'] }!less-loader`
       },
+      // {
+      //   test: /\.css/,
+      //   exclude: /^node_modules$/,
+      //   loader: `style-loader!css-loader!autoprefixer-loader?{ browsers: ['last 100 versions'] }!`
+      // },
+      // {
+      //   test: /\.less/,
+      //   exclude: /^node_modules$/,
+      //   loader: `style-loader!css-loader!autoprefixer-loader?{ browsers: ['last 100 versions'] }!less-loader`
+      // },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         loader: 'file',
         query: {
           limit: 10000,
-          name: utils.assetsPath('./src/res/img/[name].[hash:7].[ext]')
+          name: utils.assetsPath('./img/[name].[hash:7].[ext]')
         }
       },
       {
@@ -90,7 +102,7 @@ module.exports = {
         loader: 'file',
         query: {
           limit: 10000,
-          name: utils.assetsPath('./src/res/fonts/[name].[hash:7].[ext]')
+          name: utils.assetsPath('./fonts/[name].[hash:7].[ext]')
         }
       }
     ]
@@ -99,19 +111,13 @@ module.exports = {
     formatter: require('eslint-friendly-formatter')
   },
   vue: {
-    // loaders: utils.cssLoaders({
-    //   sourceMap: useCssSourceMap
-    // }),
-    loaders: {
-      css: ExtractTextPlugin.extract("css")
-    },
+    loaders: utils.cssLoaders({
+      sourceMap: useCssSourceMap
+    }),
     postcss: [
       require('autoprefixer')({
         browsers: ['last 2 versions']
       })
     ]
-  },
-  plugins: [
-    new ExtractTextPlugin("style.css")
-  ]
+  }
 }

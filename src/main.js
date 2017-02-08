@@ -21,7 +21,7 @@ import components from './components/'
 Object.keys(components).forEach((key) => {
   var name = key.replace(/(\w)/, (v) => v.toUpperCase())
   Vue.component(`v-${name}`, components[key])
-  // console.log(key + '--' + name)
+  console.log(key + '--' + name)
 })
 // 跑起来吧
 /* eslint-disable no-new */

@@ -8,7 +8,7 @@
           <li class="bor-bott">
             <div class="item">
               <div class="icon fl iky-user"></div>
-              <input autocomplete="off" class="fl item-input nminfo" id="username" readonly="readonly" type="text" placeholder="请输入手机号或邮箱账号"
+              <input autocomplete="off" class="fl item-input nminfo" id="username" v-bind:readonly="isReadOnly" type="text" placeholder="请输入手机号或邮箱账号"
               />
               <div class="icon iky-remove"></div>
             </div>

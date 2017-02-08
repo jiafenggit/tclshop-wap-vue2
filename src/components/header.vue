@@ -14,38 +14,21 @@
         <div class="iky-delete" @click="toggleMenu('hide')"></div>
         <div class="navmenu">
           <ul>
-            <li onclick="window.location.href='/usercenter/index.html';">
-              <span class="iky-user"></span>
-              <span>个人中心</span>
+            <li @click="toggleMenu('hide')">
+              <router-link :to="{path:'/my/index'}">
+                <span class="iky-user"></span>
+                <span>个人中心</span>
+              </router-link>
             </li>
             <li class="sub">
               <span class="iky-menu"></span>
               <span>产品分类</span>
               <span class="iky-arrow-down"></span>
               <ul class="sub-item">
-                <li>
-                  <a href="/goods/catgory.html?catgoryid=tv">
-                    <span class="iky-tv"></span><span>电视</span></a>
-                </li>
-                <li>
-                  <a href="/goods/catgory.html?catgoryid=mobile">
-                    <span class="iky-mobile"></span><span>手机</span></a>
-                </li>
-                <li>
-                  <a href="/goods/catgory.html?catgoryid=air">
-                    <span class="iky-air-condition"></span><span>空调</span></a>
-                </li>
-                <li>
-                  <a href="/goods/catgory.html?catgoryid=toIcebox">
-                    <span class="iky-fridge"></span><span>冰箱</span></a>
-                </li>
-                <li>
-                  <a href="/goods/catgory.html?catgoryid=washer">
-                    <span class="iky-washing"></span><span>洗衣机</span></a>
-                </li>
-                <li>
-                  <a href="/goods/catgory.html?catgoryid=health">
-                    <span class="iky-healthy"></span><span>健康电器</span></a>
+                <li v-for="item in menu">
+                  <router-link :to="{path:'/goods/catgory',query:{catgoryid:item.link}}">
+                    <span :class="item.icon"></span><span>{{item.name}}</span></a>
+                  </router-link>
                 </li>
               </ul>
             </li>
@@ -86,9 +69,10 @@
               </a>
             </li>
             <li class="bor-bott backtopage">
-              <a href="/search.html">
+              <router-link :to="{path:'/search'}">
                 <span class="iky-search"></span>
-                <span>搜索</span></a>
+                <span>搜索</span>
+              </router-link>
             </li>
           </ul>
         </div>
@@ -98,6 +82,35 @@
 </template>
 <script>
   export default {
+    data() {
+      return {
+        menu: [{
+          name: '电视',
+          link: 'tv',
+          icon: 'iky-tv'
+        }, {
+          name: '手机',
+          link: 'mobile',
+          icon: 'iky-mobile'
+        }, {
+          name: '空调',
+          icon: 'iky-air-condition',
+          link: 'air'
+        }, {
+          name: '冰箱',
+          link: 'toIcebox',
+          icon: 'iky-fridge'
+        }, {
+          name: '洗衣机',
+          icon: 'iky-washing',
+          link: 'washer'
+        }, {
+          name: '健康电器',
+          icon: 'iky-healthy',
+          link: 'health'
+        }, ]
+      }
+    },
     created() {
       this.$util.resize()
     },

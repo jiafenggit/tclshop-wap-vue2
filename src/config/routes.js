@@ -6,70 +6,118 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 // 配置路由
-import layout from '../layout/index.vue'
-import layoutTop from '../layout/indexTop.vue'
-import index from '../pages/index.vue'
-import search from '../pages/search.vue'
+import layout from '../layout/index'
+import layoutTop from '../layout/indexTop'
+
+import index from '../pages/index'
+import search from '../pages/search'
+
 // goods
-import catgory from '../pages/goods/catgory.vue'
-import detail from '../pages/goods/detail.vue'
+import catgory from '../pages/goods/catgory'
+import detail from '../pages/goods/detail'
 
-import cart from '../pages/cart/index.vue'
+import cart from '../pages/cart/index'
 
-import login from '../pages/account/login.vue'
-import register from '../pages/account/register.vue'
+// account
+import login from '../pages/account/login'
+import register from '../pages/account/register'
+
+// my
+import collection from '../pages/my/collection'
+// import myComments from '../pages/my/comments'
+import coupons from '../pages/my/coupons'
+import historyOrder from '../pages/my/historyOrder'
+import myIndex from '../pages/my/index'
+import info from '../pages/my/info'
+import orders from '../pages/my/orders'
+import reservation from '../pages/my/reservation'
+import score from '../pages/my/score'
 
 const routes = [
   {
     path: '/',
     component: layout,
-    children: [{
-      path: '/',
-      component: index
-    }, {
-      path: '/search',
-      component: search
-    }]
+    children: [
+      {
+        path: '/',
+        name: 'home',
+        component: index
+      }, {
+        path: '/goods/catgory',
+        component: catgory
+      }
+    ]
   },
   {
-    path: '/goods',
-    component: layout,
-    children: [{
-      path: 'catgory',
-      component: catgory
-    }, {
-      path: 'detail',
-      component: detail
-    }]
-  }, {
-    path: '/cart',
-    component: layout,
-    children: [{
-      path: '/',
-      component: cart
-    }]
-  },
-  {
-    path: '/account',
+    path: '/',
     component: layoutTop,
     children: [
       {
-        path: '/login',
+        path: '/goods/detail',
+        component: detail
+      },
+      {
+        path: '/search',
+        component: search
+      },
+      {
+        path: '/cart',
+        component: cart
+      },
+      {
+        path: '/account/login',
         name: 'login',
         component: login
       },
       {
-        path: '/register',
+        path: '/account/register',
         name: 'register',
         component: register
       },
       {
-        path: '/login1',
-        component: resolve => System.import('../pages/account/login.vue')
+        path: '/my/index',
+        name: 'myIndex',
+        component: myIndex
       },
       {
-        path: '/login2',
-        component: resolve => System.import('../pages/account/login.vue')
+        path: '/my/collection',
+        name: 'collection',
+        component: collection
+      },
+      // {
+      //   path: '/my/comments',
+      //   name: 'myComments',
+      //   component: myComments
+      // },
+      {
+        path: '/my/coupons',
+        name: 'coupons',
+        component: coupons
+      },
+      {
+        path: '/my/historyOrder',
+        name: 'historyOrder',
+        component: historyOrder
+      },
+      {
+        path: '/my/info',
+        name: 'info',
+        component: info
+      },
+      {
+        path: '/my/orders',
+        name: 'myOrders',
+        component: orders
+      },
+      {
+        path: '/my/reservation',
+        name: 'reservation',
+        component: reservation
+      },
+      {
+        path: '/my/score',
+        name: 'score',
+        component: score
       }
     ]
   }

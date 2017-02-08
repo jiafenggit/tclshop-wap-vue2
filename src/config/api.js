@@ -5,11 +5,12 @@ var request = require('superagent')
 var utils = require('./utils.js')
 
 // 自定义判断元素类型JS
-function toType (obj) {
+function toType(obj) {
   return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
 }
 // 参数过滤函数
-function filterNull (o) {
+function filterNull(o) {
+  if (toType(o) !== 'object') return o
   for (var key in o) {
     if (o[key] === null) {
       delete o[key]
@@ -30,7 +31,7 @@ function filterNull (o) {
 //   return formData;
 // }
 
-function apiBase (method, url, params, success, failure) {
+function apiBase(method, url, params, success, failure) {
   var r = request(method, url).type('text/plain')
   if (params) {
     params = filterNull(params)
@@ -40,6 +41,9 @@ function apiBase (method, url, params, success, failure) {
         // params = getFormData(params)
         r.set('Content-Type', 'application/x-www-form-urlencoded')
         r.send(params)
+      } else {
+        r.set('Content-Type', 'application/json; charset=utf-8')
+        r = r.send(params)
       }
       // console.log(params)
       // r = r.send(params)
@@ -62,11 +66,12 @@ function apiBase (method, url, params, success, failure) {
     };
     if (res.status === 200) {
       if (success) {
-        success(res.body)
+        // console.log(res)
+        success(res.body || res.text)
       }
     } else {
       if (failure) {
-        failure(res.body)
+        failure(res.body || res.text)
       } else {
         window.alert('error: ' + JSON.stringify(res.body))
       }
