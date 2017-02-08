@@ -11,9 +11,9 @@ Vue.prototype.$util = utils
 // 引用路由配置文件
 import router from './config/routes'
 // 引用API文件
-import api from './config/api'
+import http from './config/api'
 // // 将API方法绑定到全局
-Vue.prototype.$api = api
+Vue.prototype.$http = http
 
 // 加载公共组件
 import components from './components/'

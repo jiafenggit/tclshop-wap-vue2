@@ -234,7 +234,7 @@
         };
       },
       detai() {
-        this.$api.get('/front/product/toProductKuyu', {
+        this.$http.get('/front/product/toProductKuyu', {
           uuid: this.uuid,
           terminalType: '02'
         }, res => {
@@ -403,7 +403,7 @@
 
       },
       getSecKillDetai() {
-        this.$api.post('/front/product/toLimitProductKuyu', {
+        this.$http.post('/front/product/toLimitProductKuyu', {
           promotionUuid: this.promotionUuid,
           skuNo: this.skuNo
         }, res => {
@@ -452,7 +452,7 @@
           promotionUuid: this.promotionUuid,
           time: Math.random()
         }
-        this.$api.post('/front/product/hasLimitProduct', params, res => {
+        this.$http.post('/front/product/hasLimitProduct', params, res => {
           if (res.retData && res.retData.canBuy && res.retData.hasProduct) {
             this.hasProductTip = '有货'
             // $('.btnbuy,.suiteBtn').prop('disabled', false);
@@ -464,7 +464,7 @@
         });
       },
       getCouponList(params) {
-        this.$api.get('/front/product/getProductDetailExtraInfo/getCouponList', {
+        this.$http.get('/front/product/getProductDetailExtraInfo/getCouponList', {
           storeUuid: this.storeUuid,
           productUuid: this.productUuid,
           regionId: this.region,
@@ -476,7 +476,7 @@
         });
       },
       getCoupon(uuid) {
-        this.$api.get('/cart/downLoadCoupon', {
+        this.$http.get('/cart/downLoadCoupon', {
           couponTypeUuid: uuid
         }, res => {
           if (res.code == '0')
@@ -488,7 +488,7 @@
         });
       },
       getSuite() {
-        this.$api.post('/front/product/getSuitMainByRegion', {
+        this.$http.post('/front/product/getSuitMainByRegion', {
           productUuid: '20672c74183745ce95430560e1a9d547', //this.productUuid,
           regionId: this.region,
           terminalType: '02'
@@ -499,7 +499,7 @@
         });
       },
       getGoodsTypes() {
-        this.$api.get('/front/product/babyset', {
+        this.$http.get('/front/product/babyset', {
           productUuid: this.productUuid
         }, res => {
           this.goodsTypeName = res.displayName;
@@ -507,7 +507,7 @@
         })
       },
       getStorePromotion() {
-        this.$api.get('/front/product/getStorePromotion', {
+        this.$http.get('/front/product/getStorePromotion', {
           storeUuid: this.storeUuid,
           productUuid: this.productUuid
         }, function (res) {
@@ -520,7 +520,7 @@
         });
       },
       getComentsCount() {
-        this.$api.get('/front/product/getAppraiseCount', {
+        this.$http.get('/front/product/getAppraiseCount', {
           productUuid: this.productUuid
         }, res => {
           //   if (res.code == '0') {
@@ -530,7 +530,7 @@
         });
       },
       hasProduct() {
-        this.$api.post('/front/product/hasProduct', this.hasProductParams, res => {
+        this.$http.post('/front/product/hasProduct', this.hasProductParams, res => {
           if (res.retData && res.retData.canBuy && res.retData.hasProduct) {
             this.hasProductTip = '有货';
             // !wartforbuy && $('.btnbuy,.suiteBtn').prop('disabled', false);

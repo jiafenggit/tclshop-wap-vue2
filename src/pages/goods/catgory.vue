@@ -236,7 +236,7 @@
         t == 2 && (this.bykey = false, this.bysort = !this.bysort);
       },
       getBanner(id) { // 取大图
-        this.$api.get('/getChannelAds/wap', {
+        this.$http.get('/getChannelAds/wap', {
           channel: id
         }, r => {
           let slider = this.sliders
@@ -259,7 +259,7 @@
         this.loadEnd = false
         this.loadTxt = '数据加载中...'
 
-        this.$api.get('/newchannel/' + this.cid, params, r => {
+        this.$http.get('/newchannel/' + this.cid, params, r => {
           this.loadEnd = true
           if (r.totalNum) {
             this.pageCount = Math.ceil(r.totalNum / this.pageShow);
@@ -297,7 +297,7 @@
       },
       getFavoriteList() {
         var _this = this;
-        this.$api.get('/front/product/getMyProductFavoriteList', null, r => {
+        this.$http.get('/front/product/getMyProductFavoriteList', null, r => {
           if (r.code == '1' && r.retData && r.retData.length > 0) {
             this.favdata = r.retData;
           };
@@ -307,7 +307,7 @@
       setFavorite(item) {
         var _this = this
         if (item.isFav) {
-          this.$api.get('/front/product/cancelFavorite', {
+          this.$http.get('/front/product/cancelFavorite', {
             productUuid: item.uuid
           }, r => {
             if (r == '1') {
@@ -321,7 +321,7 @@
             })
           });
         } else {
-          this.$api.get('/front/product/collectProduct', {
+          this.$http.get('/front/product/collectProduct', {
             productUuid: item.uuid,
           }, r => {
             console.log(r)

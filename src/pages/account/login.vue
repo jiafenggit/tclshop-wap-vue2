@@ -81,7 +81,7 @@
           backUrl: ''
         }
         // var _this = this
-        this.$api.post('/login/login', JSON.stringify(params), r => {
+        this.$http.post('/login/login', JSON.stringify(params), r => {
           if (r.code == '-5') {
             alert('验证码错误！')
             this.getCaptcha()
@@ -96,7 +96,7 @@
       },
       getCaptcha() {
         // var _this = this
-        this.$api.get('/tclcustomerregist/getcaptcha', null, r => {
+        this.$http.get('/tclcustomerregist/getcaptcha', null, r => {
           if (r.status == 1) {
             this.showCode = true
             this.captchakey = r.key
@@ -106,7 +106,7 @@
       },
       getInfo() {
         // var _this = this
-        this.$api.get('/tclcustomer/userInfo', null, r => {
+        this.$http.get('/tclcustomer/userInfo', null, r => {
           r.code == '0' && this.$util.setCookie('user', JSON.stringify(r.data));
           this.$router.go(-1)
         })

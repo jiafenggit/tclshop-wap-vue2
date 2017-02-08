@@ -139,7 +139,7 @@
       },
       getFavoriteList(callback) {
         var _this = this;
-        this.$api.get('/front/product/getMyProductFavoriteList', null, r => {
+        this.$http.get('/front/product/getMyProductFavoriteList', null, r => {
           if (r.code == '1' && r.retData && r.retData.length > 0) {
             this.favdata = r.retData;
           };
@@ -148,7 +148,7 @@
       },
       setFavorite(item) {
         if (item.isFav) {
-          this.$api.get('/front/product/cancelFavorite', {
+          this.$http.get('/front/product/cancelFavorite', {
             productUuid: item.uuid
           }, function (res) {
             res.code == '403' ? this.$router.push({
@@ -157,7 +157,7 @@
               callback && callback(res);
           });
         } else {
-          this.$api.get('/front/product/collectProduct', {
+          this.$http.get('/front/product/collectProduct', {
             productUuid: item.uuid,
           }, function (res) {
             res.code == '403' ? this.$router.push({

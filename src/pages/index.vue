@@ -94,7 +94,7 @@
     methods: {
       getDate(params) {
         if (!params) params = {}
-        this.$api.get('/getIndexAds/wap', params, r => {
+        this.$http.get('/getIndexAds/wap', params, r => {
           // console.log(r)
           this.catgory = r.channels.filter(function (m) {
             m.id = m.href.indexOf('catgory') > -1 ? m.href.split('?')[1].split('=')[1] : '';

@@ -1,38 +1,38 @@
 <template>
   <div class="usercenter">
     <div class="m-person">
-      <a href="/account/login.html">
+      <router-link :to="{path:faceLink}">
         <div class="m-person-header">
           <img :src="faceImg" />
         </div>
         <p>{{nickName}}</p>
-      </a>
+      </router-link>
     </div>
     <div class="m-person-info w90 bor-bott">
       <ul>
         <li>
-          <a href="/usercenter/orderList.html">
+          <router-link :to="{path:'/my/orders'}">
             <div class="icon iky-list">
-              <span class="circle myorder">&nbsp;</span>
+              <span class="circle myorder" v-text="orderCount" v-show="orderCount>0">&nbsp;</span>
             </div>
             <p>我的订单</p>
-          </a>
+          </router-link>
         </li>
         <li>
-          <a href="/usercenter/orderList.html?type=1">
+          <router-link :to="{path:'/my/orders',query:{type:1}}">
             <div class="icon iky-time">
-              <span class="circle waitpt">&nbsp;</span>
+              <span class="circle waitpt" v-text="waitpt" v-show="waitpt>0">&nbsp;</span>
             </div>
             <p>待付款</p>
-          </a>
+          </router-link>
         </li>
         <li>
-          <a href="/usercenter/orderList.html?type=6">
+          <router-link :to="{path:'/my/orders',query:{type:6}}">
             <div class="icon iky-address">
-              <span class="circle shopcount">&nbsp;</span>
+              <span class="circle shopcount" v-text="shopcount" v-show="shopcount>0">&nbsp;</span>
             </div>
             <p>待收货</p>
-          </a>
+          </router-link>
         </li>
       </ul>
     </div>
@@ -43,7 +43,7 @@
             <span :class="item.icon"></span>{{item.name}}
           </div>
           <div class="fr">
-            <span id="points" v-if="item.icon=='icon iky-coupon'" v-text="jifen"></span>
+            <span id="points" v-if="item.name=='我的积分'" v-text="jifen"></span>
             <span class="icon iky-arrow-right"></span>
           </div>
         </div>
@@ -55,7 +55,11 @@
   export default {
     data() {
       return {
-        jifen: null,
+        waitpt: 0,
+        shopcount: 0,
+        orderCount: 0,
+        faceLink: '/account/login',
+        jifen: '',
         nickName: '点击登陆',
         faceImg: '/res/img/default.png',
         menu: [{
@@ -102,32 +106,32 @@
     },
     methods: {
       getInfo() {
-        var _this = this
-        console.log(this.jifen)
-        this.$api.get('/tclcustomer/userInfo', null, r => {
-          _this.jifen = r.data.jifen + '积分'
-          // $('.m-person a').attr('href', '/usercenter/info.html');
-
-          this.nickName = r.data.nickName || r.data.customerName
-
-          if (r.data.customerImgUrl) {
-            var img = new Image();
-            img.onload = function () {
-              _this.faceImg = r.data.customerImgUrl
+        this.$http.get('/tclcustomer/userInfo', null, r => {
+          if (r.code == '0') {
+            this.jifen = r.data.jifen + '积分'
+            this.nickName = r.data.nickName || r.data.customerName
+            this.faceLink = '/my/info'
+            var _this = this
+            if (r.data.customerImgUrl) {
+              var img = new Image();
+              img.onload = function () {
+                _this.faceImg = r.data.customerImgUrl
+              };
+              img.src = r.data.customerImgUrl;
             };
-            img.src = r.data.customerImgUrl;
-          };
+            this.getCount()
+          }
         });
       },
       getCount() {
-        if (res.code == '0') {
-          //   "waitpay":待付款 ；"waitship":待发货；"shipping":待收货；"waitcomment":待评价；"succeedorder":已完成
-          res.data.shipping > 0 && $('.shopcount').text(res.data.shipping).show();
-          res.data.waitpay > 0 && $('.waitpt').text(res.data.waitpay).show();
-          var count = res.data.shipping + res.data.waitpay + res.data.succeedorder + res.data.waitship;
-          count > 0 && $('.myorder').text(count).show();
-          //  res.data > 0 && $('.' + eles[i]).text(res.data).show();
-        };
+        this.$http.post('/usercenter/order/query/queryAllStatusOrderCountKuyu', null, r => {
+          if (r.code == '0') {
+            //   "waitpay":待付款 ；"waitship":待发货；"shipping":待收货；"waitcomment":待评价；"succeedorder":已完成
+            this.shopcount = r.data.shipping
+            this.waitpt = r.data.waitpay
+            this.orderCount = r.data.shipping + r.data.waitpay + r.data.succeedorder + r.data.waitship;
+          }
+        })
       }
     }
   }
