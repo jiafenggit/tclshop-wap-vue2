@@ -200,14 +200,10 @@
         var params = {
           productUuid: this.uuid,
           buyNum: this.buyCount,
+          auth: 1,
           attrId: this.skuNo
         };
         this.$http.post('/front/product/addProductToCart', params, r => {
-          if (r.code == '403') {
-            this.$router.push({
-              path: '/account/login'
-            })
-          }
           if (r.code == 0) {
             this.$router.push({
               path: '/cart'

@@ -11,9 +11,11 @@ Vue.prototype.$util = utils
 // 引用路由配置文件
 import router from './config/routes'
 // 引用API文件
-import http from './config/api'
+import http from './config/http'
 // // 将API方法绑定到全局
 Vue.prototype.$http = http
+
+// import less from './res/less/index'
 
 // 加载公共组件
 import components from './components/'
@@ -21,7 +23,7 @@ import components from './components/'
 Object.keys(components).forEach((key) => {
   var name = key.replace(/(\w)/, (v) => v.toUpperCase())
   Vue.component(`v-${name}`, components[key])
-  console.log(key + '--' + name)
+  // console.log(key + '--' + name)
 })
 // 跑起来吧
 /* eslint-disable no-new */

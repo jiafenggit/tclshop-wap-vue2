@@ -247,71 +247,154 @@ var utils = {
     var win = window
 
     function w() {
-      var eleWid = htmlEle.getBoundingClientRect().width;
+      var eleWid = htmlEle.getBoundingClientRect().width
 
       if (eleWid / dprValue > 640) {
-        eleWid = 640 * dprValue;
+        eleWid = 640 * dprValue
       }
-      win.rem = eleWid / 16;
+      win.rem = eleWid / 16
       if (win.rem >= 40) {
         win.rem = 40
       };
-      htmlEle.style.fontSize = win.rem + "px";
+      htmlEle.style.fontSize = win.rem + 'px'
     }
 
     var dprValue, initScaleValue, t, doc = win.document,
       htmlEle = doc.documentElement,
       viewport = doc.querySelector('meta[name="viewport"]'),
-      metaFlexible = doc.querySelector('meta[name="flexible"]');
+      metaFlexible = doc.querySelector('meta[name="flexible"]')
     if (viewport) {
-      // console.warn("将根据已有的meta标签来设置缩放比例");
-      var o = viewport.getAttribute("content").match(/initial\-scale=(["']?)([\d\.]+)\1?/);
+      // console.warn("将根据已有的meta标签来设置缩放比例")
+      var o = viewport.getAttribute("content").match(/initial\-scale=(["']?)([\d\.]+)\1?/)
       o && (initScaleValue = parseFloat(o[2]), dprValue = parseInt(1 / initScaleValue))
     } else {
       if (metaFlexible) {
-        var o = metaFlexible.getAttribute("content").match(/initial\-dpr=(["']?)([\d\.]+)\1?/);
+        var o = metaFlexible.getAttribute("content").match(/initial\-dpr=(["']?)([\d\.]+)\1?/)
         o && (dprValue = parseFloat(o[2]), initScaleValue = parseFloat((1 / dprValue).toFixed(2)))
       }
     }
     if (!dprValue && !initScaleValue) {
       var isAndroid = (win.navigator.appVersion.match(/android/gi), win.navigator.appVersion.match(/iphone/gi)),
-        pixelRatio = win.devicePixelRatio;
+        pixelRatio = win.devicePixelRatio
       if (isAndroid) {
         if (pixelRatio >= 3) {
-          dprValue = 3;
+          dprValue = 3
         } else if (pixelRatio >= 2) {
-          dprValue = 2;
+          dprValue = 2
         } else {
-          dprValue = 1;
+          dprValue = 1
         }
       } else {
-        dprValue = pixelRatio;
+        dprValue = pixelRatio
       }
-      initScaleValue = 1 / dprValue;
+      initScaleValue = 1 / dprValue
     }
-    if (htmlEle.setAttribute("data-dpr", dprValue), !viewport) {
-      if (viewport = doc.createElement("meta"), viewport.setAttribute("name", "viewport"), viewport.setAttribute("content", "initial-scale=" + initScaleValue + ", maximum-scale=" + initScaleValue + ", minimum-scale=" + initScaleValue + ", user-scalable=no"), htmlEle.firstElementChild) {
+    if (htmlEle.setAttribute('data-dpr', dprValue), !viewport) {
+      if (viewport = doc.createElement('meta'), viewport.setAttribute('name', 'viewport'), viewport.setAttribute('content', "initial-scale=" + initScaleValue + ", maximum-scale=" + initScaleValue + ", minimum-scale=" + initScaleValue + ", user-scalable=no"), htmlEle.firstElementChild) {
         htmlEle.firstElementChild.appendChild(viewport)
       } else {
-        var newDiv = doc.createElement("div");
+        var newDiv = doc.createElement('div')
         newDiv.appendChild(viewport), doc.write(newDiv.innerHTML)
       }
     }
-    win.dpr = dprValue;
-    win.addEventListener("resize", function () {
-      clearTimeout(t);
-      t = setTimeout(w, 300);
-    }, false);
-    if ("complete" === doc.readyState) {
-      doc.body.style.fontSize = 12 * dprValue + "px";
-    }
-    doc.addEventListener("DOMContentLoaded", function () {
-      doc.body.style.fontSize = 12 * dprValue + "px";
+    win.dpr = dprValue
+    win.addEventListener('resize', function () {
+      clearTimeout(t)
+      t = setTimeout(w, 300)
     }, false)
-    w();
+    if ('complete' === doc.readyState) {
+      doc.body.style.fontSize = 12 * dprValue + 'px'
+    }
+    doc.addEventListener('DOMContentLoaded', function () {
+      doc.body.style.fontSize = 12 * dprValue + 'px'
+    }, false)
+    w()
 
+
+    win.alert = function (msg, callback) {
+      document.body.className = 'noscroll'
+      var dask = document.createElement('div')
+      dask.className = 'dask'
+      var dialog = document.createElement('div')
+      dialog.className = 'dialog bounceInDown animated'
+      dialog.innerHTML = '<p>' + (msg || '我就弹个框') + '</p>'
+      dask.appendChild(dialog)
+
+      document.body.appendChild(dask)
+
+      function fell() {
+        document.body.className = ''
+        document.body.removeChild(dask)
+        callback && setTimeout(callback(), 1000)
+      }
+      setTimeout(function () {
+        dialog.className = 'dialog bounceOutUp animated'
+        dialog.addEventListener('webkitAnimationEnd,', fell)
+        dialog.addEventListener('mozAnimationEnd,', fell)
+        dialog.addEventListener('MSAnimationEnd,', fell)
+        dialog.addEventListener('oanimationend,', fell)
+        dialog.addEventListener('animationend', fell)
+      }, 2000)
+    }
+    win.confirm = function (msg, okcallback, cancelText = '取消', okText = '确定', cancelcallback) {
+      document.body.className = 'noscroll'
+
+      var dask = document.createElement('div')
+      dask.className = 'dask'
+      var dialog = document.createElement('div')
+      dialog.className = 'dialog confirm bounceInDown animated'
+      dialog.innerHTML = '<span class="iky-info"></span><p>' + (msg || '我就弹个框') + '</p>' // <div><span id="btncancel">' + cancelText + '</span><span id="btnok">' + okText + '</span></div>
+      var bbox = document.createElement('div')
+      var bcC = false
+      var bc = document.createElement('span')
+      bc.innerHTML = cancelText
+      bc.addEventListener('click', () => {
+        bcC = true
+        dialog.className = 'dialog confirm bounceOutUp animated'
+        listen()
+      })
+      var bokC = false
+      var bok = document.createElement('span')
+      bok.id = 'btnok'
+      bok.innerHTML = okText
+      bok.addEventListener('click', () => {
+        bokC = true
+        dialog.className = 'dialog confirm bounceOutUp animated'
+        listen()
+      })
+      bbox.appendChild(bc)
+      bbox.appendChild(bok)
+
+      dialog.appendChild(bbox)
+      dask.appendChild(dialog)
+
+      document.body.appendChild(dask)
+
+      function fell() {
+        document.body.className = ''
+        document.body.removeChild(dask)
+        bokC && okcallback && setTimeout(okcallback(), 1000)
+        bcC && cancelcallback && setTimeout(cancelcallback(), 1000)
+      }
+
+      function listen() {
+        dialog.addEventListener('webkitAnimationEnd,', fell)
+        dialog.addEventListener('mozAnimationEnd,', fell)
+        dialog.addEventListener('MSAnimationEnd,', fell)
+        dialog.addEventListener('oanimationend,', fell)
+        dialog.addEventListener('animationend', fell)
+      }
+    }
+  },
+  loading: function () {
+    var ld = document.createElement('div')
+    ld.className = 'sync-loding'
+    ld.innerHTML = '<span></span>'
+    document.body.appendChild(ld)
+    return ld
   }
 }
+
 module.exports = utils
 // var __token = util.parseQuery('ihome-token')
 // var __fanliCookie = util.parseQuery('fanliCookie')

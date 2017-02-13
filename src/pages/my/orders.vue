@@ -97,14 +97,10 @@
           nowPage: this.nowPage,
           orderState: this.types == 0 ? '' : this.types,
           searchName: '',
+          auth: 1,
           ranNum: Math.ceil(Math.random() * 10000)
         };
         this.$http.post('/usercenter/order/listKuyu', params, r => {
-          if (r.code == '403') {
-            this.$router.push({
-              path: '/account/login'
-            })
-          }
           if (r && r.data && r.data.dataList && r.data.dataList.length > 0) {
 
             if (r.data.pagination.totalNum) {

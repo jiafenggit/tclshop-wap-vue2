@@ -12,14 +12,14 @@
       </div>
       <div class="filter" v-show="bykey">
         <div class="btns">
-          <input type="button" id="reset" value="重新选择" />
-          <input type="button" id="ok" value="完成" />
+          <input type="button" id="reset" value="重新选择" @click="reset(types)" />
+          <input type="button" id="ok" value="完成" @click="ok(types)" />
         </div>
         <ul class="filter-type">
-          <li class="select" v-for="item in types">
-            <p @click="showSlect">根据{{item.txt}}选择<span class="typekey"></span><span class="iky-arrow-right"></span></p>
-            <ul>
-              <li @click="" :data-key="item.key[i]" v-for="(v,i) in item.value">{{v}}</li>
+          <li v-for="item in types" :class="item.select?'select active':'select'">
+            <p @click="item.select=!item.select">根据{{item.txt}}选择<span class="typekey">{{item.selectTxt}}</span><span class="iky-arrow-right"></span></p>
+            <ul v-show="render">
+              <li @click="cheSub(item,i)" v-for="(v,i) in item.value" :class="item.actives[i]==1?'active':''">{{v}}</li>
             </ul>
           </li>
         </ul>
@@ -38,8 +38,9 @@
           </router-link>
           <div class="btns"><a :class="item.cls" @click="setFavorite(item)"><span class="iky-fav"></span><span class="txt">{{item.favTxt}}</span></a></div>
         </div>
+        <p class="empty" v-show="count==0">没有找到您要搜寻的产品...</p>
       </div>
-      <div class="loading-tip">{{loadTxt}}</div>
+      <div class="loading-tip" v-show="lists.length>0">{{loadTxt}}</div>
     </div>
   </main>
 </template>
@@ -49,10 +50,13 @@
   export default {
     data() {
       return {
+        render: true,
+        count: -1,
         loadEnd: true,
         loadTxt: '上拉加载更多...',
         bysort: false,
         bykey: false,
+        keyword1: '',
         lists: [],
         favdata: [],
         banner: [],
@@ -78,62 +82,95 @@
           tv: [{
             txt: '尺寸',
             value: ['32英寸', '40-43英寸', '48-50英寸', '50-56英寸', '60英寸以上'],
+            actives: [0, 0, 0, 0, 0],
             key: ['尺寸-32英寸', '尺寸-40英寸,尺寸-42英寸,尺寸-43英寸', '尺寸-48英寸,尺寸-49英寸,尺寸-50英寸', '尺寸-55英寸,尺寸-58英寸',
               '尺寸-65英寸,尺寸-75英寸,尺寸-78英寸,尺寸-85英寸,尺寸-100英寸'
-            ]
+            ],
+            select: false,
+            selectTxt: ''
           }, {
             txt: '特色',
             value: ['曲面屏', '高色域', '4K超高清', '安卓智能', '互联网', '蓝光'],
+            actives: [0, 0, 0, 0, 0, 0],
             key: ['屏幕类型-曲面电视', '高色域', '分辨率-3840*2160（4K分辨率/UHD）', '电视类型-智能电视,操作系统-Android', '电视类型-互联网电视', '3301B'],
+            select: false,
+            selectTxt: ''
           }],
           mobile: [{
             txt: '屏幕尺寸',
             value: ['3.6寸以下', '3.6~4.5英寸', '4.6~5.5英寸', '5.5以上'],
+            actives: [0, 0, 0, 0],
             key: ['屏幕尺寸-手机-2.4英寸', '屏幕尺寸-手机-4.5英寸', '屏幕尺寸-手机-5.15英寸,屏幕尺寸-手机-5英寸,屏幕尺寸-手机-5.5英寸',
               '屏幕尺寸-手机-5.6英寸,屏幕尺寸-手机-5.7英寸,屏幕尺寸-手机-5.8英寸,屏幕尺寸-手机-6英寸'
-            ]
+            ],
+            select: false,
+            selectTxt: ''
           }, {
             txt: '系列',
             value: ['么么哒系列', 'idol系列', 'POP系列', '老人机系列', '平板系列', '手机配件'],
-            key: ['么么哒系列', '系列-idol系列', '系列-POP系列', '系列-老人机系列', '平板系列', '手机配件']
+            actives: [0, 0, 0, 0, 0, 0],
+            key: ['么么哒系列', '系列-idol系列', '系列-POP系列', '系列-老人机系列', '平板系列', '手机配件'],
+            select: false,
+            selectTxt: ''
           }],
           toIceWash: [{ //洗衣机
             txt: '体积容量',
             value: ['5kg以下', '5-6kg', '6-7kg', '7-8kg'],
+            actives: [0, 0, 0, 0],
             key: ['洗涤容量（公斤）-5公斤', '洗涤容量（公斤）-5.5公斤,洗涤容量（公斤）-6公斤', '洗涤容量（公斤）-6公斤,洗涤容量（公斤）-7公斤',
               '洗涤容量（公斤）-8公斤,洗涤容量（公斤）-7.5公斤'
             ],
+            select: false,
+            selectTxt: ''
           }, {
             txt: '类别',
             value: ['波轮变频', '波轮全自动', '滚筒变频', '滚筒定频'],
-            key: ['波轮变频', '波轮全自动', '滚筒变频', '滚筒定频']
+            actives: [0, 0, 0, 0],
+            key: ['波轮变频', '波轮全自动', '滚筒变频', '滚筒定频'],
+            select: false,
+            selectTxt: ''
           }],
           toIcebox: [{ //冰箱
             txt: '体积容量',
             value: ['100L以下', '101L-200L', '201L-300L', '301L-500L', '500L以上'],
+            actives: [0, 0, 0, 0, 0],
             key: ['总有效容积（L）-91.00', '总有效容积（L）-118.00,总有效容积（L）-171.00,总有效容积（L）-182.00',
               '总有效容积（L）-203.00,总有效容积（L）-205.00,总有效容积（L）-206.00,总有效容积（L）-220.00,总有效容积（L）-288.00',
               '总有效容积（L）-305.00,总有效容积（L）-416.00,总有效容积（L）-456.00',
               '总有效容积（L）-515.00,总有效容积（L）-516.00,总有效容积（L）-518.00'
-            ]
+            ],
+            select: false,
+            selectTxt: ''
           }, {
             txt: '类别',
             value: ['单门式', '双门式', '三门式', '多门式', '对开门式'],
-            key: ['单门式', '双门式', '三门式', '多门式', '对开门式']
+            actives: [0, 0, 0, 0, 0],
+            key: ['单门式', '双门式', '三门式', '多门式', '对开门式'],
+            select: false,
+            selectTxt: ''
           }],
           air: [{
             txt: '匹数',
             value: ['1匹', '1.5匹', '2匹', '3匹'],
-            key: ['匹数-1P', '匹数-大1.5P', '匹数-2P', '匹数-3P']
+            actives: [0, 0, 0, 0],
+            key: ['匹数-1P', '匹数-大1.5P', '匹数-2P', '匹数-3P'],
+            select: false,
+            selectTxt: ''
           }, {
             txt: '特点',
             value: ['壁挂式', '立柜式', '圆柱式', '移动式', '五氟变频', '高效定频'],
-            key: ['空调特点-壁挂式', '空调特点-立柜式', '空调特点-圆柱式', '空调特点-移动式', '定频/变频-变频', '定频/变频-定频']
+            actives: [0, 0, 0, 0, 0, 0],
+            key: ['空调特点-壁挂式', '空调特点-立柜式', '空调特点-圆柱式', '空调特点-移动式', '定频/变频-变频', '定频/变频-定频'],
+            select: false,
+            selectTxt: ''
           }],
           toHealthEleKuyu: [{
             txt: '类别',
             value: ['空气净化器', '净水机', '吸尘器', '除螨仪', '原汁机', '电饭煲', '电磁炉', '电水壶', '电压力锅', '加湿器'],
-            key: ['空气净化器', '净水机', '吸尘器', '除螨仪', '原汁机', '电饭煲', '电磁炉', '电水壶', '电压力锅', '加湿器']
+            actives: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            key: ['空气净化器', '净水机', '吸尘器', '除螨仪', '原汁机', '电饭煲', '电磁炉', '电水壶', '电压力锅', '加湿器'],
+            select: false,
+            selectTxt: ''
           }],
         },
         cuuids: {
@@ -228,12 +265,48 @@
         this.sortType = i.value
         this.getData()
       },
-      showSlect() {
+      cheSub(item, i) {
+        var xx = []
+        for (var s in item.actives) {
+          xx[s] = 0
+        }
+        var x = item.actives[i] == 0 ? 1 : 0
+        xx[i] = x
+        item.actives = xx
+        item.selectTxt = x == 1 ? `(${item.value[i]})` : ''
+        this.render = false
+        this.render = true
+      },
+      reset(t) {
+        this.keyword1 = ''
+        for (var n in t) {
+          t[n].selectTxt = ''
+          for (var s in t[n].actives) {
+            t[n].actives[s] = 0
+          }
+        }
+        this.render = false
+        this.render = true
+      },
+      ok(t) {
+        var d = []
+        for (var n in t) {
+          for (var s in t[n].actives) {
+            t[n].actives[s] == 1 && d.push(t[n].key[s])
+          }
+        }
+        if (this.keyword1 != d.join(';')) {
+          this.lists = []
+        }
+        this.keyword1 = d.join(';')
+        this.choose(3)
 
+        this.getData()
       },
       choose(t) { // 切换
         t == 1 && (this.bysort = false, this.bykey = !this.bykey);
         t == 2 && (this.bykey = false, this.bysort = !this.bysort);
+        t == 3 && (this.bykey = this.bysort = false)
       },
       getBanner(id) { // 取大图
         this.$http.get('/getChannelAds/wap', {
@@ -253,6 +326,7 @@
           nowPage: this.nowPage,
           totalNum: this.totalNum,
           sortBy: this.sortBy,
+          keyword1: this.keyword1,
           sortType: this.sortType,
           frontCategoryUuid: this.cuuids[this.cid]
         }
@@ -261,6 +335,7 @@
 
         this.$http.get('/newchannel/' + this.cid, params, r => {
           this.loadEnd = true
+          this.count = r.totalNum
           if (r.totalNum) {
             this.pageCount = Math.ceil(r.totalNum / this.pageShow);
           };
@@ -270,7 +345,7 @@
             var d = favdata.filter(function (n) {
               return n.productUuid == m.uuid;
             })[0];
-            console.log(d)
+            // console.log(d)
             if (d && d.uuid) {
               m.favTxt = '已收藏'
               m.cls = 'favorite active'
@@ -283,6 +358,7 @@
             return m
           })
           this.lists = this.lists.concat(list)
+          this.loadTxt = this.lists.length < 8 ? '后面没有了...' : '上拉加载更多...'
         })
       },
       loadMore() {
@@ -308,34 +384,38 @@
         var _this = this
         if (item.isFav) {
           this.$http.get('/front/product/cancelFavorite', {
-            productUuid: item.uuid
+            productUuid: item.uuid,
+            auth: 1
           }, r => {
             if (r == '1') {
               item.isFav = false
               item.favTxt = '收藏'
               item.cls = 'favorite'
-              // this.favdata.splice(this.favdata.,1)
             }
-            r && r.code == '403' && _this.$router.push({
-              name: 'login'
-            })
           });
         } else {
           this.$http.get('/front/product/collectProduct', {
             productUuid: item.uuid,
+            auth: 1
           }, r => {
-            console.log(r)
             if (r == '1') {
               item.isFav = true
               item.favTxt = '已收藏'
               item.cls = 'favorite active'
-              this.favdata.push({
-                productUuid: item.productUuid
+              var d = this.favdata
+              d.map(function (n) {
+                if (n.productUuid != item.uuid) {
+                  d.push({
+                    productUuid: item.productUuid,
+                    isFav: true,
+                    favTxt: '已收藏',
+                    cls: 'favorite active'
+                  })
+                }
               })
+            } else {
+              alert('该商品无法收藏')
             }
-            r && r.code == '403' && _this.$router.push({
-              name: 'login'
-            })
           });
         }
       }

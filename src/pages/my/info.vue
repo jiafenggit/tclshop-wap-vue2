@@ -49,7 +49,7 @@
           </a>
         </li>
         <li>
-          <a href="javascript:;" id="logOut">
+          <a href="javascript:;" id="logOut" @click="logout">
             <label class="y-name">退出当前账户</label>
           </a>
         </li>
@@ -58,3 +58,29 @@
     <!-- Bill title end -->
   </div>
 </template>
+<script>
+  export default {
+    methods: {
+      logout() {
+        this.$http.get('/tclcustomer/logout', null, r => {
+          if (r.code == '0') {
+            this.$util.delCookie('token');
+            alert('您已经安全退出！');
+            var _this = this
+            setTimeout(function () {
+              _this.$router.push({
+                path: '/account/login'
+              })
+            }, 1500);
+          } else {
+            this.$util.delCookie('token');
+            this.$router.push({
+              path: '/account/login'
+            })
+          };
+        });
+      }
+    }
+  }
+
+</script>
