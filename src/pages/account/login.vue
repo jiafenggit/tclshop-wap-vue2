@@ -1,5 +1,5 @@
 <template>
-  <div class="main" id="main">
+  <div class="main" id="main" @keyup.13="login">
     <!---login html-->
     <div class="m-login">
       <div class="m-form-group group">

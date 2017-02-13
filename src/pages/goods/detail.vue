@@ -34,15 +34,16 @@
       <span class="get-pints">{{points}}</span>积分
     </div>
     <!--促销-->
-    <div class="sales">
+    <div class="sales" v-show="sales.length>0">
+      <p v-for="s in sales"><input type="button" :value="s.promotionTypes">{{s.promotionName}}</p>
     </div>
     <!--赠品-->
-    <div class="gift">
+    <div class="gift" v-show="giftlist.length>0">
       <input type="button" value="单赠品">
       <div class="giftlist">
       </div>
     </div>
-    <div class="coupons">
+    <div class="coupons" v-show="couponList.length>0">
       <input type="button" value="优惠券">
       <div class="couponlist">
         <a @click="getCoupon(m.uuid)" v-for="m in couponList" :data-jf="m.convertIntegral">{{m.couponTypeName}}</a>
@@ -56,7 +57,7 @@
     <div class="count-box">
       <span class="reduce" @click="setCart('reduce')">-</span>
       <span class="num">{{buyCount}}</span>
-      <span class="plus" @click="setCart('push')">+</span>
+      <span class="plus" @click="setCart('plus')">+</span>
     </div>
     <div class="suite">
       <div class="item" v-for="m in suiteList">
@@ -88,26 +89,26 @@
     </div>
     <div class="t-more">
       <div class="tab">
-        <span class="active" id="description">详情介绍</span>
-        <span id="specification">规格参数</span>
-        <span id="policy-service">服务政策</span>
-        <span id="common-problem">常见问题</span>
+        <span :class="showDesc?'active':''" id="description" @click="showPro('desc')">详情介绍</span>
+        <span :class="showSpecifi?'active':''" @click="showPro('specifi')">规格参数</span>
+        <span :class="showService?'active':''" @click="showPro('service')">服务政策</span>
+        <span :class="showProblem?'active':''" @click="showPro('problem')">常见问题</span>
       </div>
       <!--详情介绍-->
-      <div class="description sub" v-html="desc" v-show="showDesc">
+      <div class="description sub" v-show="showDesc" v-html="descHtml">
       </div>
       <!--规格参数-->
-      <div class="specification sub">
+      <div class="specification sub" v-html="specifiHtml" v-show="showSpecifi">
       </div>
       <!--服务政策-->
-      <div class="policy-service sub" v-show="showServer">
+      <div class="policy-service sub" v-show="showService" v-html="serviceHtml">
       </div>
       <!--常见问题-->
-      <div class="common-problem sub" v-show="showProblem">
+      <div class="common-problem sub" v-show="showProblem" v-html="problemHtml">
       </div>
     </div>
     <div class="btnbuy-box">
-      <input type="button" value="立即购买" class="btnbuy" @click="addCart">
+      <input type="button" value="立即购买" class="btnbuy" @click="addCart" v-bind:disabled="!canBuy">
     </div>
   </main>
   <main class="goods-detail" v-else="returnCode==1">
@@ -120,19 +121,16 @@
   </main>
 </template>
 <script>
-  // import slider from '../../components/slider.vue'
-
   export default {
     data() {
       return {
         commentNum: 0,
+        secondParentCategoryName: '',
         couponList: [],
         suiteList: [],
+        giftlist:[],
         goodsTypeList: [],
         goodsTypeName: null,
-        showDesc: true,
-        showServer: false,
-        showProblem: false,
         t: 5,
         _location: null,
         region: null,
@@ -144,7 +142,6 @@
         title: null,
         price: null,
         points: null,
-        desc: null,
         info: null,
         sliders: [],
         returnCode: 0,
@@ -165,7 +162,7 @@
         isReservation: false, //是否是预约商品
         reserveOrderId: null, //预约的ID，存在就是预约过了然否
         parentSkuNo: null,
-        wartforbuy: false,
+        waitforbuy: false,
         buyCount: 1, //$('.count-box .num').text(),
         productUuid: null,
         reservation: null, //预约状态 activeStatus,
@@ -173,6 +170,22 @@
         promotionUuid: null, //秒杀商品的uuid
         hasProductTip: null,
         storeUuid: null,
+        //
+        canBuy: true,
+        addcartFun: null,
+
+
+        sales: [],
+
+        showSpecifi: false,
+        specifiHtml: '',
+        showDesc: true,
+        descHtml: '',
+        showService: false,
+        serviceHtml: '',
+        showProblem: false,
+        problemHtml: '',
+
 
       }
     },
@@ -213,9 +226,27 @@
           }
         });
       },
+      setCart(op) {
+        if (this.isKill) return false;
+        // var cls = $(this).attr('class');
+        if (op == 'reduce' && this.buyCount > 1) {
+          this.buyCount--;
+        } else if (op == 'plus' && this.canBuy) {
+          this.buyCount++
+        } else {
+          return false;
+        };
+
+        if (this.addcartFun != null) {
+          clearTimeout(this.addcartFun);
+          this.addcartFun = null;
+        };
+        this.hasProductParams['buyNum'] = this.buyCount;
+        this.addcartFun = setTimeout(this.hasProduct, 300);
+      },
       setGoodsInfo(res) {
         var pro = res.productModel.productMain;
-        // secondParentCategoryName = res.secondParentCategoryName;
+        this.secondParentCategoryName = res.secondParentCategoryName;
         //名字
         this.title = pro.productName;
         //赠送积分
@@ -233,8 +264,10 @@
         })
 
         //详情
-        this.desc = res.productModel.productDescription.description;
-
+        this.descHtml = res.productModel.productDescription.description;
+        // console.log(this.descHtml)
+        // console.log(this.descHtml.split('<a name="productAttribute"></a>'))
+        this.specifiHtml = this.descHtml.split('<a name="productAttribute"></a>')[1]
         // $('.btnbuy-box').show();
         //赠品//和打折
         if (res.front && res.front.priceAndPromotion) {
@@ -327,7 +360,7 @@
             };
             this.isReservation = true;
             titleTip = '<span>预约商品</span>';
-            wartforbuy = rt[reservation].s;
+            waitforbuy = rt[reservation].s;
             $('.btnbuy').val(rt[reservation].txt)
               .prop('disabled', rt[reservation].s);
 
@@ -373,7 +406,6 @@
             $('.reservation').append('<p>发货时间：付款后<span>7</span>天内</p>');
           };
 
-
           if (res.productModel != null) {
             this.skuNo = res.productModel.productSku[0].skuNo;
             this.parentSkuNo = res.productModel.productSku[0].parentSkuNo
@@ -418,8 +450,56 @@
           }
         })
       },
-      getServicePolicies() {
-
+      showPro(t) {
+        var params = this.getParams(this.secondParentCategoryName)[0].params || {};
+        params.ranNum = Math.random();
+        switch (t) {
+          case 'desc':
+            this.showDesc = true
+            this.showSpecifi = this.showProblem = this.showService = false
+            break
+          case 'specifi':
+            this.showSpecifi = true
+            this.showDesc = this.showProblem = this.showService = false
+            // document.body.scrollTop = this.$el.querySelector('a[name="productAttribute"]').offsetTop
+            break;
+          case 'service':
+            if (this.serviceHtml == '') {
+              this.getServicePolicies(params)
+            } else {
+              this.showService = true
+              this.showSpecifi = this.showProblem = this.showDesc = false
+            }
+            break;
+          case 'problem':
+            if (this.problemHtml == '') {
+              this.getCommonProblems(params)
+            } else {
+              this.showProblem = true
+              this.showSpecifi = this.showService = this.showDesc = false
+            }
+            break;
+        }
+        document.body.scrollTop = this.$el.querySelector('.sendto').offsetTop
+      },
+      getServicePolicies(params) { // 服务政策  
+        this.$http.get('/front/product/getServicePolicies', params, res => {
+          res.wuliu && (this.serviceHtml += `<h3>物流配送</h3>${res.wuliu.replace(/&nbsp;/g, '')}`)
+          res.qianshou && (this.serviceHtml += `<h3>商品签收</h3>${res.qianshou.replace(/&nbsp;/g, '')}`)
+          res.anzhuang && (this.serviceHtml += `<h3>安装</h3>${res.anzhuang.replace(/&nbsp;/g, '')}`)
+          res.xiazai && (this.serviceHtml += `<h3>资源下载</h3>${res.xiazai.replace(/&nbsp;/g, '')}`)
+          res.fapiao && (this.serviceHtml += `<h3>发票</h3>${res.fapiao.replace(/&nbsp;/g, '')}`)
+          res.shouhou && (this.serviceHtml += `<h3>售后服务</h3>${res.shouhou.replace(/&nbsp;/g, '')}`);
+          this.showService = true
+          this.showSpecifi = this.showDesc = this.showProblem = false
+        })
+      },
+      getCommonProblems(params) { // 常见问题
+        this.$http.get('/front/product/getCommonProblems', params, res => {
+          res.retData && (this.problemHtml = res.retData.introduction)
+          this.showProblem = true
+          this.showSpecifi = this.showDesc = this.showService = false
+        })
       },
       getSecKillDetai() {
         this.$http.post('/front/product/toLimitProductKuyu', {
@@ -474,9 +554,11 @@
         this.$http.post('/front/product/hasLimitProduct', params, res => {
           if (res.retData && res.retData.canBuy && res.retData.hasProduct) {
             this.hasProductTip = '有货'
+            this.canBuy = true
             // $('.btnbuy,.suiteBtn').prop('disabled', false);
           } else {
             this.hasProductTip = '没有足够的库存或不在该地区销售'
+            this.canBuy = false
             // $('.t-has').text('没有足够的库存或不在该地区销售');
             // $('.btnbuy,.suiteBtn').prop('disabled', true);
           };
@@ -525,16 +607,17 @@
           this.goodsTypeList = res.resultlist;
         })
       },
-      getStorePromotion() {
+      getStorePromotion() { // 取促销信息
         this.$http.get('/front/product/getStorePromotion', {
           storeUuid: this.storeUuid,
           productUuid: this.productUuid
-        }, function (res) {
-          if (res.code == '0' && res.retData.length > 0) {
-            res.retData.map(function (m) {
-              $('.sales').append('<p><input type="button" value="' + getProType(m.promotionTypes) +
-                '"> ' + m.promotionName + '</p>')
-            });
+        }, r => {
+          if (r.code == '0' && r.retData.length > 0) {
+            this.sales = r.retData
+            // r.retData.map(function (m) {
+            //   $('.sales').append('<p><input type="button" value="' + getProType(m.promotionTypes) +
+            //     '"> ' + m.promotionName + '</p>')
+            // });
           };
         });
       },
@@ -542,17 +625,18 @@
         this.$http.get('/front/product/getAppraiseCount', {
           productUuid: this.productUuid
         }, res => {
-          //   if (res.code == '0') {
-          //   res.data - 0 > 0 && ($('#commentNum').text(res.data), $('.goods-title .sub').show())
-          //   };
-          this.commentNum = res.data
+          if (res.code == '0') {
+            this.commentNum = res.data
+            //   res.data - 0 > 0 && ($('#commentNum').text(res.data), $('.goods-title .sub').show())
+          };
         });
       },
       hasProduct() {
         this.$http.post('/front/product/hasProduct', this.hasProductParams, res => {
           if (res.retData && res.retData.canBuy && res.retData.hasProduct) {
             this.hasProductTip = '有货';
-            // !wartforbuy && $('.btnbuy,.suiteBtn').prop('disabled', false);
+            !this.waitforbuy && (this.canBuy = true)
+            // !waitforbuy && $('.btnbuy,.suiteBtn').prop('disabled', false);
           } else {
             if (this.buyCount > 1) {
               alert('库存不足,最多可购买' + res.retData.totalNum);
@@ -560,12 +644,83 @@
               //   $('.count-box .num').text(res.retData.totalNum);
 
               this.hasProductTip = '有货';
+              this.canBuy = true
               //   $('.btnbuy,.suiteBtn').prop('disabled', false);
+
             } else {
               this.hasProductTip = '没有足够的库存或不在该地区销售';
+              this.canBuy = false
               //   $('.btnbuy,.suiteBtn').prop('disabled', true);
             }
           };
+        });
+      },
+      getParams(goodsName) {
+        var types = [{
+          name: '洗衣机',
+          params: {
+            wuliu: "c6055e457f7b484cbf49abe087c6f8da",
+            qianshou: "d07ace1eff21407aaf7e26855bb190a5",
+            anzhuang: "d911c31011544233ac11da69f577e767",
+            fapiao: "1caeb4e0a6514ce5a6b490e895a82ffc",
+            shouhou: "ee6b1942dedf4f58bba9351705a893ed",
+            zhifu: "3565e84ad66e4e6aad96c7fc1d8e7651",
+            contentId: 'f81f3607e4f3456090ba8bcca85951d8'
+          }
+        }, {
+          name: ',健康电器,小家电,扫地机器人,空气净化器,净水机,除湿机,厨房电器',
+          params: {
+            wuliu: "7df0a31cfee643cdae0122533bd9dfa5",
+            qianshou: "868f19d29dfb4d7fba5b29f12dc94a90",
+            anzhuang: "4e1302f534e74c58b23fc1deb3836959",
+            fapiao: "4805dae2dd5741cbb39b9a570695df03",
+            shouhou: "b1ce1f4e4dfe4410aab0223dd3fdc9f2",
+            contentId: '2e7bd73263294306aa854567ab788db3'
+          }
+        }, {
+          name: ',3800,5800,6800,7800,8800,9700,9500,电视周边,大家电,电视,',
+          params: {
+            wuliu: "67c2a427179a4ae5b5b9d775f5ef1e87",
+            qianshou: "f9b7a60bbb3f4d4393b080ed23077b7e",
+            anzhuang: "7029eb4ecb6e4fa9bbc74c1dbf9b51ab",
+            fapiao: "ecb70381b5104769a8bf9e2840f161e2",
+            shouhou: "ebc2914cf7834e708d957d56686d3b56",
+            contentId: 'fa94bfe2696c4fffa06c3c51587fbf14'
+          }
+        }, {
+          name: '手机,智能穿戴,平板电脑,么么哒手机,TCL手机,手机周边,自拍杆,耳机,充电宝,',
+          params: {
+            wuliu: "73092ec2f8d547cea24beccbab328e5f",
+            qianshou: "b12eb7a493a549c89d561d5dd9e6717f",
+            xiazai: "0ae01a49a8c848599b90de3a8f546328",
+            fapiao: "b4cb311cc2ea459099e4fe293abce84b",
+            shouhou: "a5382bbf78244f44b5b8dc6bbe73d47f",
+            contentId: '65e88cd1af33419d81c97ff2262139c4'
+          }
+        }, {
+          name: ',空调,定频,变频,',
+          params: {
+            wuliu: "39fa90a897314c578b6c936bce45bcda",
+            qianshou: "7ffc8648bdbd4e43ad25c0e5f2676cbc",
+            anzhuang: "73319ec6d8a84aaab2dd3e95c9b0a70e",
+            fapiao: "d5aa8863992b4eebb36799760922ce3b",
+            shouhou: "9b25d3ec43ab4a64aaebcc92aea54d72",
+            contentId: '81cc9db61f764c9a9060f7c92a1dbd19'
+          }
+        }, {
+          name: '冰箱',
+          params: {
+            wuliu: "fb449767614943bc8958bf8a15900901",
+            qianshou: "567f4b296244499da5d429b270fd857e",
+            anzhuang: "21bee1417cf74e7483aacc9437629354",
+            fapiao: "c13466f785034eb4a0cee26820b69a28",
+            shouhou: "7931d94c47474935b64d2eb99921942e",
+            zhifu: "b6aac52200604bac83552a31c2f98937",
+            contentId: 'b7f47f7938bc4e3a8bdc35d1db66cbdb'
+          }
+        }];
+        return types.filter(function (value) {
+          return value.name.indexOf(goodsName) > -1
         });
       }
     }

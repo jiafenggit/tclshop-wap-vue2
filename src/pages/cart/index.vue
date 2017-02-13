@@ -170,6 +170,8 @@
             this.checkCount = count
             this.price = r.data.cartsTotalMount
             this.basePrice = r.data.productTotalMount
+          }else{
+            this.goodCount =0
           }
         });
       }

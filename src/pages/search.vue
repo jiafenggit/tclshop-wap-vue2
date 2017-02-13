@@ -1,8 +1,8 @@
 <template>
   <main class="search">
     <div class="search-box">
-      <span class="iky-search"></span>
-      <input type="text" id="search-key" placeholder="超薄电视" v-model="keyword" />
+      <span class="iky-search" @click="getData"></span>
+      <input type="text" id="search-key" placeholder="超薄电视" v-model="keyword" @keyup.13="getData" />
       <input type="button" id="submits" value="取消" @click="$router.go(-1)" />
       <span class="iky-remove" v-show="keyword.length>0" @click="keyword=''"></span>
     </div>
@@ -12,14 +12,14 @@
         <li v-for="item in hotKey" @click="hotKeySearch(item)">{{item}}</li>
       </ul>
     </div>
-    <div class="search-hotkey history" v-show="historySearch.length>0&&lists.length==0">
+    <div class="search-hotkey history" v-show="historySearch.length>0&&count<0">
       <p>历史搜索</p>
       <ul>
         <li v-for="item in historySearch" @click="hotKeySearch(item)"><span class="iky-timing"></span>{{item}}</li>
       </ul>
     </div>
     <div class="item-list">
-      <div class="filter-btns" v-show="count>0">
+      <div class="filter-btns" v-show="count>=0">
         <a class="btn-filter" @click="choose(1)"><span class="iky-menu"></span>筛选</a>
         <a class="btn-sort" @click="choose(2)">排序<span class="iky-triangle"></span></a>
       </div>
@@ -51,7 +51,7 @@
           </router-link>
           <div class="btns"><a :class="item.cls" @click="setFavorite(item)"><span class="iky-fav"></span><span class="txt">{{item.favTxt}}</span></a></div>
         </div>
-        <p class="empty" v-show="count==0">没有找到您要搜寻的产品...</p>
+        <p class="empty" v-show="count==0">没有找到您要搜寻的产品...<router-link :to="{path:'/'}">返回首页</router-link></p>
       </div>
       <div class="loading-tip" v-show="lists.length>0">{{loadTxt}}</div>
     </div>
@@ -67,9 +67,11 @@
         bysort: false,
         bykey: false,
         keyword: '',
+        oldkeyword: '',
         historySearch: [],
         lists: [],
         types: [],
+        favdata: [],
         attributeAttrValueStr: '',
         firstCategoryId: '',
         nowPage: 1,
@@ -117,7 +119,7 @@
         bind: function (el, binding) {
           var _this = this;
           window.addEventListener('scroll', () => {
-            if (document.body.scrollTop + window.innerHeight >= el.clientHeight + 500) {
+            if (document.body.scrollTop + window.innerHeight >= el.clientHeight + 50) {
               binding.value();
             }
           })
@@ -148,17 +150,26 @@
         xx[i] = x
         item.actives = xx
         item.selectTxt = x == 1 ? `(${item.value[i]})` : ''
+
+        if (item.fid) {
+          this.firstCategoryId = x == 1 ? item.fid[i] : ''
+        }
+
+
+
         this.render = false
         this.render = true
       },
       reset(t) {
-        this.keyword1 = ''
+        // this.keyword = ''
         for (var n in t) {
           t[n].selectTxt = ''
           for (var s in t[n].actives) {
             t[n].actives[s] = 0
           }
         }
+        this.firstCategoryId = ''
+        this.attributeAttrValueStr = ''
         this.render = false
         this.render = true
       },
@@ -166,13 +177,13 @@
         var d = []
         for (var n in t) {
           for (var s in t[n].actives) {
-            t[n].actives[s] == 1 && d.push(t[n].key[s])
+            t[n].actives[s] == 1 && t[n].attrs && d.push(t[n].attrs[s])
           }
         }
-        if (this.keyword1 != d.join(';')) {
+        if (this.keyword != d.join(';')) {
           this.lists = []
         }
-        this.keyword1 = d.join(';')
+        this.attributeAttrValueStr = d.join(';')
         this.choose(3)
 
         this.getData()
@@ -183,6 +194,10 @@
         t == 3 && (this.bykey = this.bysort = false)
       },
       getData() {
+        if (this.keyword.length == 0) {
+          alert('请输入关键字!')
+          return
+        }
         var params = {
           pageShow: this.pageShow,
           nowPage: this.nowPage,
@@ -191,13 +206,111 @@
           firstCategoryId: this.firstCategoryId,
           sortBy: this.sortBy,
           sortType: this.sortType,
-          attributeAttrValueStr: attributeAttrValueStr,
+          attributeAttrValueStr: this.attributeAttrValueStr,
           ranNum: Math.random()
         }
-        loadEnd = false
-        loadTxt = '数据加载中....'
+        this.loadEnd = false
+        this.loadTxt = '数据加载中....'
         this.$http.post('/itemsearch/toProductList', params, r => {
+          this.loadEnd = true
+          this.count = r.totalNum
 
+          if (this.oldkeyword != this.keyword) {
+            this.lists = []
+            this.types = []
+            this.sortBy = 'sortWeight'
+            this.sortType = 1
+            this.nowPage = 1
+            this.attributeAttrValueStr = ''
+            this.pageCount = 0
+
+
+            //存储搜索历史记录
+            if (this.keyword && this.historySearch.indexOf(this.keyword) == -1) {
+              this.historySearch.splice(0, 0, this.keyword);
+            } else {
+              this.historySearch.splice(this.historySearch.indexOf(this.keyword), 1);
+              this.historySearch.splice(0, 0, this.keyword);
+            };
+            this.$util.setCookie('historySearch', this.historySearch.toString());
+          };
+          if (r.totalNum) {
+            this.pageCount = Math.ceil(r.totalNum / this.pageShow);
+          };
+          var types = this.types
+
+          var lb = r.categoryMap
+          var attr = r.attributeMap
+          var attrSub = r.attributeValueMap
+          //筛选分类
+          if (lb && lb.length > 0 && this.oldkeyword != this.keyword) {
+
+            // {
+            //   txt: '尺寸',
+            //   value: ['32英寸', '40-43英寸', '48-50英寸', '50-56英寸', '60英寸以上'],
+            //   actives: [0, 0, 0, 0, 0],
+            //   key: ['尺寸-32英寸', '尺寸-40英寸,尺寸-42英寸,尺寸-43英寸', '尺寸-48英寸,尺寸-49英寸,尺寸-50英寸', '尺寸-55英寸,尺寸-58英寸',
+            //     '尺寸-65英寸,尺寸-75英寸,尺寸-78英寸,尺寸-85英寸,尺寸-100英寸'
+            //   ],
+            //   select: false,
+            //   selectTxt: ''
+            // }
+
+            //
+            //类别分类
+            var x = {}
+            x.txt = '类别'
+            x.selectTxt = ''
+            x.select = false
+            x.value = []
+            x.fid = []
+            x.actives = []
+            lb.map(function (m) {
+              x.value.push(m.name)
+              x.fid.push(m.id)
+              x.actives.push(0)
+            })
+            types.push(x)
+
+            //类型
+            attr.map(function (m) {
+              var x = {}
+              x.txt = m.name
+              x.selectTxt = ''
+              x.select = false
+              x.value = []
+              x.attrs = []
+              x.actives = []
+              attrSub[m.id].map(function (n) {
+                x.value.push(n.name)
+                x.attrs.push(`${m.id}#${n.id}`)
+                x.actives.push(0)
+              })
+              types.push(x)
+            })
+          };
+
+          //收藏情况
+          var favdata = this.favdata
+          var list = r.list.map(function (m) {
+            var d = favdata.filter(function (n) {
+              return n.productUuid == m.uuid;
+            })[0];
+            // console.log(d)
+            if (d && d.uuid) {
+              m.favTxt = '已收藏'
+              m.cls = 'favorite active'
+              m.isFav = true
+            } else {
+              m.favTxt = '收藏'
+              m.cls = 'favorite'
+              m.isFav = false
+            }
+            return m
+          })
+          this.lists = this.lists.concat(list)
+          this.loadTxt = this.lists.length < 8 ? '' : '上拉加载更多...'
+          this.oldkeyword = this.keyword
         })
 
       },
@@ -217,7 +330,7 @@
           if (r.code == '1' && r.retData && r.retData.length > 0) {
             this.favdata = r.retData;
           };
-          _this.getData()
+          // _this.getData()
         })
       },
       setFavorite(item) {
@@ -261,21 +374,13 @@
       },
       hotKeySearch(key) {
         this.keyword = key;
-        this.sortBy = 'sortWeight';
-        this.sortType = 1;
-        this.nowPage = 1;
-        this.attributeAttrValueStr = [];
-        this.pageCount = 0;
-        this.firstCategoryId = '';
+        // this.sortBy = 'sortWeight';
+        // this.sortType = 1;
+        // this.nowPage = 1;
+        // this.attributeAttrValueStr = [];
+        // this.pageCount = 0;
+        // this.firstCategoryId = '';
 
-        //存储搜索历史记录
-        if (this.keyword && this.historySearch.indexOf(this.keyword) == -1) {
-          this.historySearch.splice(0, 0, this.keyword);
-        } else {
-          this.historySearch.splice(this.historySearch.indexOf(this.keyword), 1);
-          this.historySearch.splice(0, 0, this.keyword);
-        };
-        this.$util.setCookie('historySearch', this.historySearch.toString());
         this.getData();
       }
     }
