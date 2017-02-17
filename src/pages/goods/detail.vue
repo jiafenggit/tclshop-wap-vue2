@@ -2,11 +2,11 @@
   <main class="goods-detail" v-if="returnCode==0">
     <div class="goods-title">
       <h2 class="goods-name">{{title}}</h2>
-      <div class="sub">
+      <div class="sub" v-show="commentNum>0">
         <span class="iky-weibo-line"></span>
         <span>详情</span>
         <!--this.commentLink = '/goods/comment.html?' + (psale || this.isPreSales ? 'type=presale' : '') + 'uuid=' +              this.uuid + '&attrId=' + this.skuNo-->
-        <router-link id="comment" :to="{path:'/goods/comment',query:{uuid:this.uuid,attrId:this.skuNo}}" v-show="commentNum>0">
+        <router-link id="comment" :to="{path:'/goods/comment',query:{uuid:this.uuid,attrId:this.skuNo}}">
           <span id="commentNum">{{commentNum}}</span><span class="iky-msg1"></span>
         </router-link>
       </div>
@@ -51,7 +51,7 @@
     </div>
     <div class="base-types">
       <h2 class="t-title">{{goodsTypeName}}</h2>
-      <router-link v-for="m in goodsTypeList" :to="{path:'/goods/detail',query:{id:m.uuid}}">{{m.displayName}}</router-link>
+      <router-link v-for="m in goodsTypeList" :to="{path:'/goods/detail',query:{id:m.uuid}}" :class="m.uuid==uuid?'active':''">{{m.displayName}}</router-link>
     </div>
     <p class="t-count">数量</p>
     <div class="count-box">
@@ -81,7 +81,7 @@
     </div>
     <div class="sendto">
       <p class="t-to">配送到：</p>
-      <p class="t-address">
+      <p class="t-address" @click="vShow=true">
         <span class="all">{{localaddress}}</span>
         <span class="iky-arrow-down"></span>
       </p>
@@ -110,6 +110,7 @@
     <div class="btnbuy-box">
       <input type="button" value="立即购买" class="btnbuy" @click="addCart" v-bind:disabled="!canBuy">
     </div>
+    <v-Address :vShow="vShow" @setLocation="setLocation" @close="close"></v-Address>
   </main>
   <main class="goods-detail" v-else="returnCode==1">
     <div class="empty">
@@ -124,11 +125,12 @@
   export default {
     data() {
       return {
+        vShow: false,
         commentNum: 0,
         secondParentCategoryName: '',
         couponList: [],
         suiteList: [],
-        giftlist:[],
+        giftlist: [],
         goodsTypeList: [],
         goodsTypeName: null,
         t: 5,
@@ -205,10 +207,45 @@
       this.localaddress = this._location.address || '广东省 深圳市 南山区 西丽街道'
       this.detai()
     },
+    watch: {
+      '$route' (to, from) {
+        this.uuid = this.$route.query.id
+        // console.log(to,from)
+        this.detai()
+      }
+    },
+    mounted: function () {
+      console.log(1);
+    },
     // components: {
     //   slider,
     // },
     methods: {
+      close() {
+        this.vShow = false
+      },
+      setLocation(add) {
+        this.region = add.regionId
+        this.cityId = add.cityId
+        this.provinceId = add.provinceId
+        this.areaUuid = add.streetId
+        this.localaddress = add.localaddress
+        // $('.t-address .all').text(localaddress);
+        var _location = {
+          region: this.region,
+          areaUuid: this.areaUuid,
+          cityId: this.cityId,
+          provinceId: this.provinceId,
+          address: this.localaddress
+        };
+
+        this.hasProductParams['region'] = this.region;
+        this.hasProductParams['areaUuid'] = this.areaUuid;
+
+
+        this.$util.setCookie('location', JSON.stringify(_location));
+        this.isKill ? this.hasSecKillProduct() : this.hasProduct();
+      },
       addCart() {
         var params = {
           productUuid: this.uuid,
@@ -248,11 +285,11 @@
         var pro = res.productModel.productMain;
         this.secondParentCategoryName = res.secondParentCategoryName;
         //名字
-        this.title = pro.productName;
+        this.title = pro.productName
         //赠送积分
         this.points = (parseInt(res.front.priceAndPromotion.price));
         //轮播图
-        var sliders = this.sliders
+        var sliders = this.sliders = []
 
         sliders.push({
           style: 'background-image:url("' + res.front.bigPicture + '")'
@@ -450,7 +487,7 @@
           }
         })
       },
-      showPro(t) {
+      showPro(t) { // 展示商品服务等详情
         var params = this.getParams(this.secondParentCategoryName)[0].params || {};
         params.ranNum = Math.random();
         switch (t) {
@@ -621,7 +658,7 @@
           };
         });
       },
-      getComentsCount() {
+      getComentsCount() { // 获取评论数量
         this.$http.get('/front/product/getAppraiseCount', {
           productUuid: this.productUuid
         }, res => {

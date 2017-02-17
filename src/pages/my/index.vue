@@ -61,7 +61,7 @@
         faceLink: '/account/login',
         jifen: '',
         nickName: '点击登陆',
-        faceImg: '/res/img/default.png',
+        faceImg: require('../../res/img/default.png'),
         menu: [{
             name: '我的收藏',
             link: '/my/collection',

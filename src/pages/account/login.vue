@@ -16,7 +16,7 @@
         <div class="m-form-group m-group">
           <input type="text" class="J-LoginCode" id="captchadata" placeholder="请输入验证码" v-model="captchadata" maxlength="4" onkeyup="this.value=this.value.replace(/\D/g,'')"
             onafterpaste="this.value=this.value.replace(/\D/g,'')">
-            <span class="pass-code"><img v-bind:src="codeUrl" id="imgcode" @click="getCaptcha"></span>
+          <span class="pass-code"><img v-bind:src="codeUrl" id="imgcode" @click="getCaptcha"></span>
         </div>
       </div>
       <div class="login-password">
@@ -26,9 +26,9 @@
         <input type="button" class="btn" id="loginbtn" v-bind:disabled="uid.length==0||pwd.length==0" value="登录" @click="login" />
       </div>
       <div class="m-cancel">
-        <a href="/account/register.html" class="">立即注册</a>
+        <router-link :to="{path:'/account/register'}">立即注册</router-link>
         <span>|</span>
-        <a href="/account/reset-password.html" class="">忘记密码</a>
+        <router-link :to="{path:'/account/resetPassword'}">忘记密码</router-link>
       </div>
     </div>
     <div class="login-m-other">
@@ -39,7 +39,7 @@
       </div>
       <div class="other-login">
         <a class="J-LoginOther" id="login-qq" data-type="2">
-          <span><img src="/res/img/others_qq.png"></span>
+          <span><img :src="qq"></span>
           <p>QQ</p>
         </a>
         <a class="J-LoginOther" id="login-webchat" data-type="3">
@@ -47,7 +47,7 @@
           <p>微信</p>
         </a>
         <a href="#" class="J-LoginOther" id="login-weibo" data-type="1">
-          <span><img src="/res/img/weibo.png"></span>
+          <span><img :src="weibo"></span>
           <p>微博</p>
         </a>
       </div>
@@ -58,6 +58,8 @@
   export default {
     data() {
       return {
+        qq: require('../../res/img/others_qq.png'),
+        weibo: require('../../res/img/weibo.png'),
         uid: '',
         pwd: '',
         iswx: this.$util.iswx(),

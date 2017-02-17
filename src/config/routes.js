@@ -15,6 +15,7 @@ import search from '../pages/search'
 // goods
 import catgory from '../pages/goods/catgory'
 import detail from '../pages/goods/detail'
+import comment from '../pages/goods/comment'
 
 import cart from '../pages/cart/index'
 
@@ -32,6 +33,10 @@ import info from '../pages/my/info'
 import orders from '../pages/my/orders'
 import reservation from '../pages/my/reservation'
 import score from '../pages/my/score'
+
+//  order
+import orderConfirm from '../pages/order/confirm'
+
 
 const routes = [
   {
@@ -55,6 +60,10 @@ const routes = [
       {
         path: '/goods/detail',
         component: detail
+      },
+      {
+        path: '/goods/comment',
+        component: comment
       },
       {
         path: '/search',
@@ -118,6 +127,11 @@ const routes = [
         path: '/my/score',
         name: 'score',
         component: score
+      },
+      {
+        path: '/order/confirm',
+        name: 'orderConfirm',
+        component: orderConfirm
       }
     ]
   }

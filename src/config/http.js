@@ -101,7 +101,7 @@ function httpBase(method, url, params, success, failure) {
   })
 }
 
-var server = 'http://10.120.54.47/rest'
+var server = '/rest'
 
 // 返回在vue模板中的调用接口
 export default {

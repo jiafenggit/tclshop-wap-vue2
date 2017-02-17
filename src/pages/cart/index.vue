@@ -35,8 +35,8 @@
         </div>
       </div>
       <div class="btn-box">
-        <input type="button" value="继续购物" class="toshop">
-        <input type="button" value="去结算" class="topay">
+        <input type="button" value="继续购物" class="toshop" @click="$router.push({path:'/'})">
+        <input type="button" value="去结算" class="topay" @click="$router.push({path:'/order/confirm'})" />
       </div>
     </div>
     <div class="empty" v-show="goodCount==0">
