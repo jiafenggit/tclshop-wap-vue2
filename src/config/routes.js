@@ -33,9 +33,13 @@ import info from '../pages/my/info'
 import orders from '../pages/my/orders'
 import reservation from '../pages/my/reservation'
 import score from '../pages/my/score'
+import orderDetail from '../pages/my/orderDetail'
+
 
 //  order
 import orderConfirm from '../pages/order/confirm'
+import orderPay from '../pages/order/pay'
+import paySuccess from '../pages/order/paySuccess'
 
 
 const routes = [
@@ -119,6 +123,11 @@ const routes = [
         component: orders
       },
       {
+        path: '/my/orderDetail',
+        name: 'orderDetail',
+        component: orderDetail
+      },
+      {
         path: '/my/reservation',
         name: 'reservation',
         component: reservation
@@ -132,6 +141,16 @@ const routes = [
         path: '/order/confirm',
         name: 'orderConfirm',
         component: orderConfirm
+      },
+      {
+        path: '/order/pay',
+        name: 'orderPay',
+        component: orderPay
+      },
+      {
+        path: '/order/paySuccess',
+        name: 'paySuccess',
+        component: paySuccess
       }
     ]
   }

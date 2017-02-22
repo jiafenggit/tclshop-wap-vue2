@@ -6,7 +6,7 @@
         <a @click="toggleMenu('show')"><span class="iky-menu"></span></a>
         <router-link to="/cart/">
           <span class="iky-cart"></span>
-          <span class="cart-count" v-show="cartCount>0" v-text="cartCount"></span>
+          <span class="cart-count" v-show="$store.state.count>0" v-text="$store.state.count"></span>
         </router-link>
         <router-link to="/search"><span class="iky-search"></span></router-link>
       </div>
@@ -116,8 +116,10 @@
       }
     },
     created() {
+      // console.log(this.$store.state.count)
       this.$util.resize()
       this.getCount()
+      
     },
     methods: {
       toggleMenu(t) {
@@ -133,7 +135,7 @@
         if (this.$util.getCookie('token') != null)
           this.$http.get('/cart/count', null, r => {
             if (r.code == '0') {
-              this.cartCount = r.data
+              this.$store.state.count = r.data
             }
           });
       }

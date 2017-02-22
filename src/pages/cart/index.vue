@@ -36,7 +36,7 @@
       </div>
       <div class="btn-box">
         <input type="button" value="继续购物" class="toshop" @click="$router.push({path:'/'})">
-        <input type="button" value="去结算" class="topay" @click="$router.push({path:'/order/confirm'})" />
+        <input type="button" value="去结算" class="topay" @click="toOrder" />
       </div>
     </div>
     <div class="empty" v-show="goodCount==0">
@@ -170,10 +170,21 @@
             this.checkCount = count
             this.price = r.data.cartsTotalMount
             this.basePrice = r.data.productTotalMount
-          }else{
-            this.goodCount =0
+          } else {
+            this.goodCount = 0
           }
+          this.$store.state.count = this.goodCount
         });
+      },
+      toOrder() {
+        var t = this.data.length
+        this.data.map(function (m) {
+          m.checked == false && t--
+        })
+        t == 0 ? alert('至少选择一件商品才能结算') :
+          this.$router.push({
+            path: '/order/confirm'
+          })
       }
     }
   }

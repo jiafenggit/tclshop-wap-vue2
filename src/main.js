@@ -19,16 +19,21 @@ Vue.prototype.$http = http
 
 // 加载公共组件
 import components from './components/'
+
 // console.log(components)
 Object.keys(components).forEach((key) => {
   var name = key.replace(/(\w)/, (v) => v.toUpperCase())
   Vue.component(`v-${name}`, components[key])
   // console.log(key + '--' + name)
 })
+
+import store from './store/store'
+
 // 跑起来吧
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   router: router,
-  render: h => h(App)
+  render: h => h(App),
+  store
 })
