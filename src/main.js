@@ -12,8 +12,12 @@ Vue.prototype.$util = utils
 import router from './config/routes'
 // 引用API文件
 import http from './config/http'
+// import http from './config/axios'
+// import http from './config/resource'
+// import resource from 'vue-resource'
+// Vue.use(resource)
 // // 将API方法绑定到全局
-Vue.prototype.$http = http
+Vue.prototype.$http= http
 
 // import less from './res/less/index'
 

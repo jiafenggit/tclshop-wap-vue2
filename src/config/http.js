@@ -41,7 +41,7 @@ function httpBase(method, url, params, success, failure) {
   syncTime++
   syncFun && clearTimeout(syncFun)
   if (params) {
- //   params = filterNull(params)
+    params = filterNull(params)
     if (method === 'POST' || method === 'PUT') {
       if (toType(params) === 'object') {
         // params = JSON.stringify(params)

@@ -123,7 +123,7 @@
             <div class="billgoodsimg"><img :src="g.url"></div>
             <div class="billgoodstxt">
               <p v-text="g.name"></p>
-              <p class="attrs" v-for="x in g.attrs">' + x.name + '：' + x.value + '</p>
+              <p class="attrs" v-for="x in g.attrs">{{x.name}}：{{x.value}}</p>
               <p>{{g.price}}元 X {{g.buyNum}}</p>
               <span class="stock">有货</span>
             </div>
@@ -843,7 +843,7 @@
             if (res.code == '0') {
               //isGroup 1是组合，2是单品
               this.$util.delCookie('seckilldata')
-              this.$router.push({
+              this.$router.replace({
                 path: '/order/pay',
                 query: {
                   orderId: res.payOrderId,
@@ -886,7 +886,7 @@
               this.$util.delCookie('presalesdata')
               // window.location.href = '/order/orderpay.html?orderid=' + res.retData.payOrderId + '&ordertype=' +
               // ordertype + '&type=' + res.retData.orderType
-              this.$router.push({
+              this.$router.replace({
                 path: '/order/pay',
                 query: {
                   orderId: res.payOrderId,
@@ -909,7 +909,7 @@
 
           this.$http.get('/cart/saveOrderKuyu', this.params, res => {
             if (res.code == '0') {
-              this.$router.push({
+              this.$router.replace({
                 path: '/order/pay',
                 query: {
                   orderId: res.payOrderId,

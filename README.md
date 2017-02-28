@@ -1,7 +1,7 @@
 # tclshop-wap-vue
 
-> tcl 移动端商城
-
+> tcl 官网商城移动端 
+> 重构第二版 Vue2.0+ webpack
 ## Build Setup
 
 ``` bash

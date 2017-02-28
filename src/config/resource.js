@@ -1,9 +1,12 @@
 // 配置API接口地址
 
-// axios 8+ ✔
-import axios from 'axios'
+// vue-resource 8+ ✔
+import resource from 'vue-resource'
 import utils from './utils.js'
 import router from './routes'
+import Vue from 'vue'
+
+Vue.use(resource)
 
 // 自定义判断元素类型JS
 function toType(obj) {
@@ -39,37 +42,36 @@ function httpBase(method, url, params, success, failure) {
   syncTime === 0 && ld == null && (ld = utils.loading())
   syncTime++
   syncFun && clearTimeout(syncFun)
-  var contentType = ''
   params = filterNull(params)
-  if (method === 'POST' || method === 'PUT') {
-    if (toType(params) === 'object') {
-      contentType = 'application/x-www-form-urlencoded'
-    } else {
-      contentType = 'application/json; charset=utf-8'
-    }
-  } else if (method === 'GET' || method === 'DELETE') {
-    contentType = 'application/json; charset=utf-8'
-  }
-  //   console.log(method.toLowerCase(), url, params, contentType)
 
-  axios({
-    method: method,
-    url: url,
-    params: params,
-    // baseUrl: 'http://127.0.0.1/rest',
-    headers: {
-      'Content-Type': contentType,
-      'ihome-timestamp': utils.createTimestamp(),
-      'ihome-token': utils.getCookie('token'),
-      'uid': utils.createTimestamp() + '-' + utils.uuid(),
-      'ihome-version': '0.0.1',
-      'appversion': '0.0.1'
-    },
-    // timeout: 1000,
-    transformRequest: function (data) {
-      //   console.log(data)
-    },
-    transformResponse: function (data) {
+  //   if (method === 'POST' || method === 'PUT') {
+  //     this.$http.post(url, params, function (data) {
+  //       success && success(data)
+  //     }).error(function (data, status, request) {
+  //       console.log('fail' + status + ',' + request)
+  //     })
+  //   } else if (method === 'GET' || method === 'DELETE') {
+  //     this.$http.get(url, params, function (data) {
+  //       success && success(data)
+  //     }).error(function (data, status, request) {
+  //       console.log('fail' + status + ',' + request)
+  //     })
+  //   }
+
+  this.$http({
+      method: method,
+      url: url,
+      data: params,
+      headers: {
+        'ihome-timestamp': utils.createTimestamp(),
+        'ihome-token': utils.getCookie('token'),
+        'uid': utils.createTimestamp() + '-' + utils.uuid(),
+        'ihome-version': '0.0.1',
+        'appversion': '0.0.1'
+      },
+      emulateJSON: method === 'POST' ? true : false
+    })
+    .then(function (data) { //  es5写法
       syncTime--
       syncTime <= 0 && (syncTime = 0)
       // console.log(syncTime)
@@ -79,23 +81,17 @@ function httpBase(method, url, params, success, failure) {
           ld = null
         }
       }, 300)
-      data = JSON.parse(data)
       if (data && data.code === '403' && params && params.auth) {
         router.push({
           path: '/account/login'
         })
         return
       }
-      //   console.log(data)
       success && success(data)
-    },
-    validateStatus: function (status) {
-      //   console.log(status)
-      return status >= 200 && status < 300 //   default 
-    }
-  })
+    }, function (data, status, request) {
+      console.log(data, status, request)
+    })
 }
-
 var server = '/rest'
 // var server = 'http://10.120.54.47/rest'
 
