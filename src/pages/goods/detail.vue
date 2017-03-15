@@ -35,7 +35,7 @@
     </div>
     <!--促销-->
     <div class="sales" v-show="sales.length>0">
-      <p v-for="s in sales"><input type="button" :value="s.promotionTypes">{{s.promotionName}}</p>
+      <p v-for="s in sales"><input type="button" :value="getProType(s.promotionTypes)">{{s.promotionName}}</p>
     </div>
     <!--赠品-->
     <div class="gift" v-show="giftlist.length>0">
@@ -644,12 +644,21 @@
           this.goodsTypeList = res.resultlist;
         })
       },
+      getProType:function (p) {
+        var _p = '';
+        p.indexOf('1') >= 0 && (_p += '满减');
+        p.indexOf('4') >= 0 && (_p += '满赠');
+        p.indexOf('5') >= 0 && (_p += '打折');
+        p.indexOf('6') >= 0 && (_p += '满折');
+        p.indexOf('7') >= 0 && (_p += '买减');
+        return _p;
+      },
       getStorePromotion() { // 取促销信息
         this.$http.get('/front/product/getStorePromotion', {
           storeUuid: this.storeUuid,
           productUuid: this.productUuid
         }, r => {
-          if (r.code == '0' && r.retData.length > 0) {
+          if (r.code == 0) {
             this.sales = r.retData
             // r.retData.map(function (m) {
             //   $('.sales').append('<p><input type="button" value="' + getProType(m.promotionTypes) +

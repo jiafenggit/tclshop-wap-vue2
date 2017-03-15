@@ -116,7 +116,7 @@
         <div id="showStores" class="goods-list">
           <div class="billgoods">
             <div class="sales">
-              <p v-for="s in sales"><input type="button" :value="s.value">{{s.promotionName}}</p>
+              <p v-for="s in sales"><input type="button" :value="s.value">{{s.name}}</p>
             </div>
           </div>
           <div class="billgoods" v-for="g in goodsList">
@@ -512,8 +512,9 @@
               return _p
             }
             // $('#showStores').append('<div class="billgoods"><div class="sales"></div></div>')
+            var _this = this
             cx.map(function (m) {
-              this.sales.push({
+              _this.sales.push({
                 name: m.promotionName,
                 value: getProType(m.promotionTypes)
               })
@@ -523,14 +524,13 @@
           }
           if (mzgift && mzgift.length > 0) {
             mzgift.map(function (m) {
-              this.sales.push({
+              _this.sales.push({
                 name: '赠品',
                 value: `${m.productName} x 1`
               })
               // $('.sales').append('<p><input type="button" value="赠品"> ' + m.productName + ' X ' + 1 + '</p>')
             })
           }
-          var _this = this
 
           c.filter(function (n, i) {
             _this.items[i] = {

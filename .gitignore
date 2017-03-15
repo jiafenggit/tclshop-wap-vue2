@@ -6,3 +6,5 @@ test/e2e/reports
 .vscode
 *.log
 *副本
+*.xml
+*.iml

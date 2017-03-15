@@ -36,24 +36,27 @@ var syncFun = null
 var ld = null
 
 function httpBase(method, url, params, success, failure) {
-  var r = request(method, url).type('text/plain')
+  var r = request(method, url)
   syncTime === 0 && ld == null && (ld = utils.loading())
   syncTime++
   syncFun && clearTimeout(syncFun)
   if (params) {
     params = filterNull(params)
     if (method === 'POST' || method === 'PUT') {
-      if (toType(params) === 'object') {
+      if (toType(params) === 'formdata') {
+      console.log(toType(params))
+        // r.responseType('blob')
+        // r.set('Content-Type', 'multipart/form-data')
+        r.send(params)
+      } else if (toType(params) === 'object') {
         // params = JSON.stringify(params)
         // params = getFormData(params)
-        r.set('Content-Type', 'application/x-www-form-urlencoded')
+        r.set('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
         r.send(params)
       } else {
         r.set('Content-Type', 'application/json; charset=utf-8')
-        r = r.send(params)
+        r.send(params)
       }
-      // console.log(params)
-      // r = r.send(params)
     } else if (method === 'GET' || method === 'DELETE') {
       r.set('Content-Type', 'application/json; charset=utf-8')
       r = r.query(params)
@@ -83,6 +86,10 @@ function httpBase(method, url, params, success, failure) {
     };
     if (res.status === 200) {
       if (success) {
+        if (res.body && res.body.code === '9999') {
+          alert('系统错误')
+          return
+        }
         if (res.body && res.body.code === '403' && params && params.auth) {
           router.push({
             path: '/account/login'
@@ -109,6 +116,20 @@ export default {
     return httpBase('GET', server + url, params, success, failure)
   },
   post: function (url, params, success, failure) {
+    return httpBase('POST', server + url, params, success, failure)
+  },
+  upload: function (url, id, success, failure) {
+    var params = new window.FormData();
+    var obj = document.getElementById(id).files[0]
+    if (obj.type != 'image/png' && obj.type != 'image/jpeg' && obj.type != '') {
+      alert('目前只支持上传png，jpg格式图片')
+      return false
+    }
+    if (obj.size > 3 * 1204 * 1204) {
+      alert('上传文件不能大于3MB')
+      return false
+    }
+    params.append(id, obj)
     return httpBase('POST', server + url, params, success, failure)
   },
   put: function (url, params, success, failure) {

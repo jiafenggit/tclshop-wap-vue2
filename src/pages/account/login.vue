@@ -42,11 +42,11 @@
           <span><img :src="qq"></span>
           <p>QQ</p>
         </a>
-        <a class="J-LoginOther" id="login-webchat" data-type="3">
+        <a class="J-LoginOther" id="login-webchat" data-type="3" v-show="iswx">
           <span class="iky-webchat"></span>
           <p>微信</p>
         </a>
-        <a href="#" class="J-LoginOther" id="login-weibo" data-type="1">
+        <a href="#" class="J-LoginOther" id="login-weibo" data-type="1" style="float:right;">
           <span><img :src="weibo"></span>
           <p>微博</p>
         </a>

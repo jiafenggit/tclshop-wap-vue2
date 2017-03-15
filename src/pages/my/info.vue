@@ -13,27 +13,27 @@
           <label class="y-name">头像</label>
           <b class="y-ico iky-arrow-right"></b>
           <span class="y-picshow" id="avatar">
-            <img id="headerimgUpload" src="/res/img/default.png" />
+            <img id="headerimgUpload" :src="face" />
           </span>
-          <input type="file" accept="image/*" class="cameraInput" id="imgFile" name="imgFile">
+          <input type="file" accept="image/*" class="cameraInput" @change="upload" id="imgFile" name="imgFile">
         </li>
         <li>
           <label class="y-name">生日</label>
           <b class="y-ico iky-arrow-right"></b>
-          <input type="text" class="y-inputdata" id="appDate" placeholder="" readonly="">
+          <input type="date" class="y-inputdata" v-model="birthday" @change="updateBirthday" />
         </li>
         <li>
           <a href="/usercenter/bindPhone.html">
             <label class="y-name">手机号</label>
             <b class="y-ico iky-arrow-right"></b>
-            <span class="y-data" id="phoneNum"></span>
+            <span class="y-data" v-text="bindPhone"></span>
           </a>
         </li>
         <li>
           <a href="/usercenter/bindEmail.html">
             <label class="y-name">邮箱</label>
             <b class="y-ico iky-arrow-right"></b>
-            <span class="y-data" id="email"></span>
+            <span class="y-data" v-text="bindMail"></span>
           </a>
         </li>
         <li>
@@ -60,7 +60,71 @@
 </template>
 <script>
   export default {
+    data(){
+      return{
+        customerUuid:'',
+        face:require('../../res/img/default.png'),
+        birthday:'',
+        bindPhone:'',
+        bindMail:'',
+      }
+    },
+    created(){
+      this.getUserInfo()
+    },
     methods: {
+      getUserInfo(){
+        this.$http.get('/tclcustomer/userInfo', null, res=> {
+              if(res.code==0){
+                 var user = res.data
+                 if(user.customerImgUrl){
+                    var img = new Image();
+                    var _this = this
+                    img.onload = function () {
+                         _this.face = user.customerImgUrl
+                    };
+                    img.src = user.customerImgUrl;
+                 }
+                 this.customerUuid = user.customerUuid
+                 this.birthday =user.birthday
+                 this.bindPhone =user.bindPhone
+                 this.bindMail =user.bindMail
+              }
+        });
+      },
+      upload(){
+        this.$http.upload('/usercenter/customercomplex/uploadImage','imgFile',res=>{
+               if (res.code == '-1') {
+                    alert('上传失败');
+                } else if (res.code == '-2') {
+                    alert("图片大小不能超过4M");
+                } else if (res.code == '-3') {
+                    alert("请选择正确的图片格式");
+                } else if (res.code == '0') {
+                    this.face = res.data.remotePath
+                    //保存更新头像信息
+                    this.$http.post('/usercenter/customercomplex/updateImage', {
+                        img: this.face
+                    }, r=> {
+                        if (res.code == '0') {
+                            alert("头像修改成功");
+                        };
+                    });
+                };
+        })
+      },
+      updateBirthday(){
+          this.$http.post('/usercenter/customercomplex/doModifyCustomerInfoKuyu', {
+            birthday:this.birthday,
+            customerUuid:this.customerUuid
+            }, res=>{
+                if (res.code == '0') {
+                    alert("恭喜，修改成功");
+                } else {
+                    alert("修改失败，请稍后重试");
+                }
+            })
+      },
       logout() {
         this.$http.get('/tclcustomer/logout', null, r => {
           if (r.code == '0') {

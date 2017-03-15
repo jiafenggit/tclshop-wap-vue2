@@ -9,17 +9,9 @@
       <h3 class="title">产品分类</h3>
       <ul>
         <li v-for="item in catgory">
-          <router-link :to="{path:'/goods/catgory',query:{id:item.id}}" v-if="item.id!=''"><span class="iky-a">{{item.icon}}</span>{{item.name}}</router-link>
+          <router-link :to="{path:'/goods/catgory',query:{id:item.id}}" v-if="item.id.indexOf('http')==-1"><span class="iky-a">{{item.icon}}</span>{{item.name}}</router-link>
           <a :href="item.href" target="_blank" v-else><span class="iky-a">{{item.icon}}</span>{{item.name}}</a>
           <li>
-            <!--<li><a href="/goods/catgory.html?catgoryid=tv"><span class="iky-tv"></span>电视</a></li>
-            <li><a href="/goods/catgory.html?catgoryid=mobile"><span class="iky-mobile"></span>手机</a></li>
-            <li><a href="/goods/catgory.html?catgoryid=refrigerator"><span class="iky-fridge"></span>冰箱</a></li>
-            <li><a href="/goods/catgory.html?catgoryid=air"><span class="iky-air-condition"></span>空调</a></li>
-            <li><a href="/goods/catgory.html?catgoryid=washer"><span class="iky-washing"></span>洗衣机</a></li>
-            <li><a href="/goods/catgory.html?catgoryid=health"><span class="iky-healthy"></span>健康电器</a></li>
-            <li><a href="http://m.fans.tcl.com" target="_blank"><span class="iky-user"></span>社区</a></li>
-            <li><a href="http://hy.tcl.com/wap/default" target="_blank"><span class="iky-points"></span>积分</a></li>-->
       </ul>
     </div>
     <div class="pro-collection">
@@ -92,12 +84,27 @@
     //   slider
     // },
     methods: {
+      getCategoryId:function(url){
+        if(url){
+          url = url.indexOf('catgory') > -1 ? url.split('?')[1].split('=')[1] : url;
+          var x = url.replace('http://m.tcl.com/frontback/platDfFront/toChannel/','')
+          switch(x){
+            case '100b389129474b29966fbcbcae80bbca':return 'tv';
+            case 'e6a8905919754222901f97193ec2fd9a':return 'mobile';
+            case '33926b5759eb4daab650c713fe2227fb':return 'refrigerator';
+            case 'd1e7f190c7a24af5847a362f0c7e1903':return 'air';
+            case '84b404ef5b73405a8a1940f4d6222e1c':return 'washer';
+            case '28866f5e0825457e91b3301ea54c103f':return 'health';
+            default: return url
+          }
+        }
+      },
       getDate(params) {
         if (!params) params = {}
         this.$http.get('/getIndexAds/wap', params, r => {
-          // console.log(r)
+          var _this =this;
           this.catgory = r.channels.filter(function (m) {
-            m.id = m.href.indexOf('catgory') > -1 ? m.href.split('?')[1].split('=')[1] : '';
+            m.id = _this.getCategoryId(m.href)
             return m;
           });
           this.collection = r.mainAds.filter(function (m) {

@@ -34,6 +34,8 @@ import orders from '../pages/my/orders'
 import reservation from '../pages/my/reservation'
 import score from '../pages/my/score'
 import orderDetail from '../pages/my/orderDetail'
+import address from '../pages/my/address'
+import addressDetail from '../pages/my/addressDetail'
 
 
 //  order
@@ -42,122 +44,128 @@ import orderPay from '../pages/order/pay'
 import paySuccess from '../pages/order/paySuccess'
 
 
-const routes = [
-  {
-    path: '/',
-    component: layout,
-    children: [
-      {
-        path: '/',
-        name: 'home',
-        component: index
-      }, {
-        path: '/goods/catgory',
-        component: catgory
-      }
+const routes = [{
+            path: '/',
+            component: layout,
+            children: [{
+                path: '/',
+                name: 'home',
+                component: index
+            }, {
+                path: '/goods/catgory',
+                component: catgory
+            }]
+        },
+        {
+            path: '/',
+            component: layoutTop,
+            children: [{
+                    path: '/goods/detail',
+                    component: detail
+                },
+                {
+                    path: '/goods/comment',
+                    component: comment
+                },
+                {
+                    path: '/search',
+                    component: search
+                },
+                {
+                    path: '/cart',
+                    component: cart
+                },
+                {
+                    path: '/account/login',
+                    name: 'login',
+                    component: login
+                },
+                {
+                    path: '/account/register',
+                    name: 'register',
+                    component: register
+                },
+                {
+                    path: '/my/index',
+                    name: 'myIndex',
+                    component: myIndex
+                },
+                {
+                    path: '/my/collection',
+                    name: 'collection',
+                    component: collection
+                },
+                // {
+                //   path: '/my/comments',
+                //   name: 'myComments',
+                //   component: myComments
+                // },
+                {
+                    path: '/my/coupons',
+                    name: 'coupons',
+                    component: coupons
+                },
+                {
+                    path: '/my/historyOrder',
+                    name: 'historyOrder',
+                    component: historyOrder
+                },
+                {
+                    path: '/my/info',
+                    name: 'info',
+                    component: info
+                },
+                {
+                    path: '/my/orders',
+                    name: 'myOrders',
+                    component: orders
+                },
+                {
+                    path: '/my/orderDetail',
+                    name: 'orderDetail',
+                    component: orderDetail
+                },
+                {
+                    path: '/my/reservation',
+                    name: 'reservation',
+                    component: reservation
+                },
+                {
+                    path: '/my/score',
+                    name: 'score',
+                    component: score
+                },
+                {
+                    path: '/my/address',
+                    name: 'address',
+                    component: address
+                },
+                {
+                    path: '/my/addressDetail',
+                    name: 'addressDetail',
+                    component: addressDetail
+                },
+                {
+                    path: '/order/confirm',
+                    name: 'orderConfirm',
+                    component: orderConfirm
+                },
+                {
+                    path: '/order/pay',
+                    name: 'orderPay',
+                    component: orderPay
+                },
+                {
+                    path: '/order/paySuccess',
+                    name: 'paySuccess',
+                    component: paySuccess
+                }
+            ]
+        }
     ]
-  },
-  {
-    path: '/',
-    component: layoutTop,
-    children: [
-      {
-        path: '/goods/detail',
-        component: detail
-      },
-      {
-        path: '/goods/comment',
-        component: comment
-      },
-      {
-        path: '/search',
-        component: search
-      },
-      {
-        path: '/cart',
-        component: cart
-      },
-      {
-        path: '/account/login',
-        name: 'login',
-        component: login
-      },
-      {
-        path: '/account/register',
-        name: 'register',
-        component: register
-      },
-      {
-        path: '/my/index',
-        name: 'myIndex',
-        component: myIndex
-      },
-      {
-        path: '/my/collection',
-        name: 'collection',
-        component: collection
-      },
-      // {
-      //   path: '/my/comments',
-      //   name: 'myComments',
-      //   component: myComments
-      // },
-      {
-        path: '/my/coupons',
-        name: 'coupons',
-        component: coupons
-      },
-      {
-        path: '/my/historyOrder',
-        name: 'historyOrder',
-        component: historyOrder
-      },
-      {
-        path: '/my/info',
-        name: 'info',
-        component: info
-      },
-      {
-        path: '/my/orders',
-        name: 'myOrders',
-        component: orders
-      },
-      {
-        path: '/my/orderDetail',
-        name: 'orderDetail',
-        component: orderDetail
-      },
-      {
-        path: '/my/reservation',
-        name: 'reservation',
-        component: reservation
-      },
-      {
-        path: '/my/score',
-        name: 'score',
-        component: score
-      },
-      {
-        path: '/order/confirm',
-        name: 'orderConfirm',
-        component: orderConfirm
-      },
-      {
-        path: '/order/pay',
-        name: 'orderPay',
-        component: orderPay
-      },
-      {
-        path: '/order/paySuccess',
-        name: 'paySuccess',
-        component: paySuccess
-      }
-    ]
-  }
-]
-// 使用配置文件规则
+    // 使用配置文件规则
 const router = new Router({
-  routes
+    routes
 })
 
 export default router
