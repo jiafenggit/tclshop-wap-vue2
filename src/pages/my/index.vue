@@ -37,7 +37,7 @@
       </ul>
     </div>
     <div class="m-person-item w90">
-      <router-link :to="item.link" v-for="item in menu">
+      <router-link :to="item.link" v-for="item in menu" v-if="item.link.indexOf('http')==-1">
         <div class="row bor-bott">
           <div class="fl">
             <span :class="item.icon"></span>{{item.name}}

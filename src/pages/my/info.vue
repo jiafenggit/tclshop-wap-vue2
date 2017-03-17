@@ -37,16 +37,16 @@
           </a>
         </li>
         <li>
-          <a href="/order/changeAddress.html?from=usercenter">
+          <router-link :to="{name:'address'}">
             <label class="y-name">收货地址</label>
             <b class="y-ico iky-arrow-right"></b>
-          </a>
+          </router-link>
         </li>
         <li>
-          <a href="/account/reset-password.html">
+          <router-link :to="{name:'resetPassword'}">
             <label class="y-name">修改密码</label>
             <b class="y-ico iky-arrow-right"></b>
-          </a>
+          </router-link>
         </li>
         <li>
           <a href="javascript:;" id="logOut" @click="logout">
@@ -74,7 +74,7 @@
     },
     methods: {
       getUserInfo(){
-        this.$http.get('/tclcustomer/userInfo', null, res=> {
+        this.$http.get('/tclcustomer/userInfo', {auth:1}, res=> {
               if(res.code==0){
                  var user = res.data
                  if(user.customerImgUrl){
@@ -116,7 +116,8 @@
       updateBirthday(){
           this.$http.post('/usercenter/customercomplex/doModifyCustomerInfoKuyu', {
             birthday:this.birthday,
-            customerUuid:this.customerUuid
+            customerUuid:this.customerUuid,
+            auth:1
             }, res=>{
                 if (res.code == '0') {
                     alert("恭喜，修改成功");

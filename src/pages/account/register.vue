@@ -8,37 +8,37 @@
           <li class="bor-bott">
             <div class="item">
               <div class="icon fl iky-user"></div>
-              <input autocomplete="off" class="fl item-input nminfo" id="username" v-bind:readonly="isReadOnly" type="text" placeholder="请输入手机号或邮箱账号"
-              />
-              <div class="icon iky-remove"></div>
+              <input autocomplete="off" class="fl item-input nminfo"  v-model="uid"   type="text" placeholder="请输入手机号或邮箱账号"/>
+              <div class="icon iky-remove" @click="uid=''" v-show="uid.length>0"></div>
             </div>
           </li>
           <li class="bor-bott">
             <div class="item">
               <div class="icon fl iky-email"></div>
-              <input autocomplete="off" class="fl item-input yzinfo" id="code" readonly="readonly" type="text" maxlength="6" placeholder="请输入验证码"
-              />
-              <div id="sendCode" class="item-input sendCode">获取验证码 </div>
+              <input autocomplete="off" class="fl item-input yzinfo" v-model="code"  type="text" maxlength="6" placeholder="请输入验证码" />
+              <div id="sendCode" class="item-input sendCode" @click="checkUser">{{sendCodeBtnText}} </div>
             </div>
           </li>
           <li class="bor-bott">
             <div class="item">
               <div class="icon fl iky-lock"></div>
-              <input class="fl item-input pswdinfo" autocomplete="off" type="password" readonly="readonly" maxlength="16" minlength="8"
-                placeholder="请输入密码" id="password" />
-              <div class="icon passwordSee fr iky-eye"></div>
+              <input class="fl item-input pswdinfo" ref="pwd" v-model="pwd" type="password"  maxlength="16" minlength="8" placeholder="请输入密码"/>
+              <div class="icon passwordSee fr iky-eye"   @click="$refs.pwd.type=$refs.pwd.type=='text'?'password':'text'"></div>
             </div>
           </li>
         </ul>
         <div class="m-register-tip">
           密码长度8~16位，数字、字母、字符至少包含两种
         </div>
-        <div class="y-regisipt"><input type="checkbox" id="remenberme"><span class="y-text">已阅读并同意用户服务条款和隐私政策</span></div>
+        <div class="y-regisipt">
+            <input type="checkbox" id="remenberme" v-model="iagree">
+           <span class="y-text" @click="dlgShow=true">已阅读并同意用户服务条款和隐私政策</span>
+        </div>
       </div>
     </div>
-    <input type="button" class="m-option-submit" id="submits" value="注册" disabled="disabled" />
+    <input type="button" class="m-option-submit" @click="submit" value="注册" v-bind:disabled="uid.length==0||pwd.length==0||code.length==0" />
     <!--背景遮罩层-->
-    <section class="modal-bg">
+    <section class="modal-bg" v-show="dlgShow">
       <!--背景遮罩层 end-->
       <!--注册协议-->
       <section class="y-registxieyi">
@@ -127,10 +127,157 @@
           </div>
         </article>
         <footer>
-          <a href="#" class="button" id="iagree">同意</a>
+          <a class="button" id="iagree" @click="dlgShow=false;iagree=true">同意</a>
         </footer>
       </section>
     </section>
     <!--注册协议 end-->
   </div>
 </template>
+<script>
+  export default{
+    data(){
+      return{
+        dlgShow:false,
+        iagree:false,
+        uid:'',
+        pwd:'',
+        code:'',
+        sendkey:'',
+        issendCode:true,
+        exitsUser:false,
+        startTimeInt:null,
+        sendCodeBtnText:'获取验证码',
+        min:60,
+        detail:''
+      }
+    },
+    created(){
+      this.detail = this.$route.query.detail
+    },
+    methods:{
+      checkUser(){
+          if (!this.$util.checkUser(this.uid)) {
+            alert('请填写正确的手机号或邮箱账号！');
+            return false;
+        };
+        if (!this.issendCode) {
+            return false;
+        };
+        this.$http.post('/tclcustomerregist/checkusername', {
+                'username': this.uid
+            },res=> {
+            if (res && res.code == '0') {
+                this.exitsUser = false;
+                this.sendCode()
+            } else {
+                alert('该账号已经存在,无法注册');
+                this.exitsUser = true;
+            }
+        });
+      },
+      sendCode(){
+          this.sendkey = this.$util.uuid()
+          var params = {
+              username: this.uid,
+              type: this.$util.checkUser(this.uid, 2) ? 2 : 3,
+              'img-key': this.sendkey
+          };
+          var _this = this
+          this.$http.post('/tclcustomerregist/sendMessagetoPhoneOrEmail',params, r=> {
+              if (r && r.code == '0') {
+                  alert('验证码发送成功，请注意查收！');
+                  _this.issendCode = false; 
+                  _this.mins = 60;
+                  _this.startTimeInt && clearInterval(_this.startTimeInt);
+                  _this.startTimeInt = setInterval(function(){
+                      if (_this.mins == 0) {
+                          _this.sendCodeBtnText='获取验证码'
+                          _this.startTimeInt && clearInterval(_this.startTimeInt);
+                          _this.issendCode = true;
+                      } else {
+                          _this.mins--;
+                          _this.sendCodeBtnText='(' + _this.mins + 's)后重发'
+                      };
+                  }, 1000);
+              } else if (r && r.code == '-9') {
+                  alert('验证码发送过于频繁啦~请稍后再试');
+              }
+          });
+      },
+      submit(){
+          if (this.exitsUser){
+            alert('该账号已经存在！')
+            return;
+          } 
+          if (this.detail) {
+              this.registerAndBind()
+          } else {
+              this.register()
+          };
+      },
+      register(){
+        var params = {
+            username: this.uid,
+            password: this.pwd,
+            type: this.$util.checkUser(this.uid, 2) ? 2 : 3,
+            key: this.sendkey,
+            inputcode: this.code
+        };
+        if (!this.$util.checkUser(this.uid)) {
+            alert('请填写正确的手机号或邮箱账号！');
+            return false
+        };
+        if (!this.$util.checkStrong(this.pwd)) {
+            alert('密码规格不符合，请重写填写');
+            return false
+        };
+        this.$http.get('/tclcustomerregist/cloudRegisterByWap',params, res=> {
+              if (res.code == '2') {
+                  alert('该用户已经存在，请更换后再试！');
+              } else if (res.code == '1') {
+                  alert('恭喜你，注册成功！');
+                  setTimeout(function () {
+                      window.location.href = '/account/login.html';
+                  }, 1000);
+              } else {
+                  if (res.code == '-4') {
+                      alert('验证码错误！');
+                      return false;
+                  }
+                  alert('注册失败，请检查！');
+              };
+          });
+      },
+      registerAndBind(){
+         var data = this.detail && JSON.parse(this.detail);
+         var params = {
+              type: this.$util.checkUser(uid, 2) ? 2 : 3,
+              platformId: data.user.thirdUser.platformId,
+              thirdPartyId: data.user.thirdUser.thirdPartyId,
+              thirdPartyNickname: data.user.thirdUser.thirdPartyNickname,
+              token: data.token,
+              phone: this.uid,
+              password: this.pwd
+          };
+          this.$http.post('/tclcustomer/toBindRegist',params, res=> {
+              if (res.code != '0') {
+                  if (res.code == '-4') {
+                      alert('验证码错误！');
+                      return false;
+                  };
+                  alert('注册关联失败，请返回重试！')
+              } else {
+                  alert('注册关联成功！');
+                  this.$util.setCookie('token', res.token);
+                  var _this =this
+                  setTimeout(function () {
+                      var u = _this.$util.parseQuery('backurl');
+                      window.location.href = u ? u : '/';
+                  }, 1000);
+              }
+          })
+      }
+    }
+  }
+</script>

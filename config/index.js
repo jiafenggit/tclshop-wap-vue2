@@ -29,8 +29,8 @@ module.exports = {
         assetsPublicPath: '/',
         proxyTable: {
             '/rest': {
-                // target: 'http://10.120.54.47/rest',
-                target: 'http://m.tcl.com/rest',
+                target: 'http://10.120.54.47/rest',
+                // target: 'http://m.tcl.com/rest',
                 changeOrigin: true,
                 pathRewrite: {
                     '^/rest': '',
